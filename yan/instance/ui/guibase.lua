@@ -253,7 +253,7 @@ function guiBase:New(o, screen)
             o:SetColor(theme:GetColor())
         end
        
-        if o.Type == "TextButton" or o.Type == "TextInput" then
+        if o.Type == "TextButton" or o.Type == "TextInput" or o.Type == "ImageButton" then
             function o:MouseEnterDefault()
                 o:SetColor(theme:GetHoverColor())
             end
@@ -282,7 +282,7 @@ function guiBase:New(o, screen)
         if o.Type == "TextInput" then
             o:SetPlaceholderTextColor(theme:GetPlaceholderTextColor())
         end
-
+        
         if o.CornerRoundness ~= nil then
             o.CornerRoundness = theme.CornerRoundness
         end
