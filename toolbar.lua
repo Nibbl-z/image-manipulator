@@ -28,7 +28,7 @@ function toolbar:Init()
     playTool:SetPosition(0,5,0,5)
     playTool.ZIndex = 3
     playTool:ApplyTheme(defaultTheme)
-
+    
     playTool.MouseDown = function ()
         self.running = not self.running
 

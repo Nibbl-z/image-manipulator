@@ -74,11 +74,31 @@ function love.mousemoved(x, y, dx, dy)
 end
 
 function love.filedropped(file)
+    for _, pixel in ipairs(pixels) do
+        pixel.body:destroy()
+        pixel = nil
+    end
+
     pixels = {}
     
     file:open("r")
     fileData = file:read("data")
-    image = love.image.newImageData(fileData)
+    
+    local image
+    
+    local success, err = pcall(function()
+        image = love.image.newImageData(fileData)
+    end)
+    
+    if not success then
+        love.window.showMessageBox("Error", "This is not a valid image!", "error", false)
+        return
+    end
+
+    if image:getWidth() * image:getHeight() >= 50*50 then
+        love.window.showMessageBox("Beware!", "This image is quite large! It will probably lag a lot!", "warning", false)
+    end
+    
     
     local i = 1
     
@@ -90,16 +110,18 @@ function love.filedropped(file)
     for x = 0, image:getWidth() - 1 do
         for y = 0, image:getHeight() - 1 do
             local r, g, b, a = image:getPixel(x,y)
+            if a ~= 0 then
+                pixels[i] = physicsInstace:New(nil, world, "dynamic", "rectangle", {X = sizeX, Y = sizeY}, 0, 0, 
+                {
+                    X = x * sizeX * spacing + mX - imageWidth / 2, 
+                    Y = y * sizeY * spacing + mY - imageHeight / 2
+                })
+                pixels[i]:SetColor(r,g,b,a)
+                pixels[i].Shape = "rectangle"
+                pixels[i].Size = {X = sizeX, Y = sizeY}
+                i = i + 1
+            end
             
-            pixels[i] = physicsInstace:New(nil, world, "dynamic", "rectangle", {X = sizeX, Y = sizeY}, 0, 0, 
-            {
-                X = x * sizeX * spacing + mX - imageWidth / 2, 
-                Y = y * sizeY * spacing + mY - imageHeight / 2
-            })
-            pixels[i]:SetColor(r,g,b,a)
-            pixels[i].Shape = "rectangle"
-            pixels[i].Size = {X = sizeX, Y = sizeY}
-            i = i + 1
         end
     
         
