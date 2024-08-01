@@ -58,16 +58,18 @@ function physicsInstance:New(o, world, bodyType, shape, size, restitution, dampi
             o.Color.A
         )
         
-        love.graphics.polygon("fill", o.body:getWorldPoints(o.shape:getPoints()))
         
-        if o.Shape == "rectangle" then
-            --[[love.graphics.rectangle(
+        
+        if o.Scaling == true then
+            love.graphics.rectangle(
                 "fill",
                 o.body:getX(),
                 o.body:getY(),
-                size.X,
-                size.Y
-            )]]
+                o.Size.X,
+                o.Size.Y
+            )
+        else
+            love.graphics.polygon("fill", o.body:getWorldPoints(o.shape:getPoints()))
         end
     end
     

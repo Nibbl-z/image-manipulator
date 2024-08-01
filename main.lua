@@ -121,11 +121,15 @@ function love.mousemoved(x, y, dx, dy)
             for _, image in ipairs(imagesToScale) do
                 for _, pixel in ipairs(image) do
                     print("literaly image")
-                    pixel.Size.X = pixel.Size.X + dx / 32
-                    pixel.Size.Y = pixel.Size.Y + dy / 32
+                    pixel.Scaling = true
+                    pixel.Size.X = pixel.Size.X + dx / pixel.ImageSize.X * 2
+                    pixel.Size.Y = pixel.Size.Y + dy / pixel.ImageSize.Y * 2
                     
-                    pixel.body:setX(pixel.PixelPosition.X * pixel.Size.X * spacing - pixel.ImageSize.X / 2)
-                    pixel.body:setY(pixel.PixelPosition.Y * pixel.Size.Y * spacing - pixel.ImageSize.Y / 2)
+                    local imageWidth = pixel.ImageSize.X * spacing * pixel.Size.X
+                    local imageHeight = pixel.ImageSize.Y * spacing * pixel.Size.Y 
+                    
+                    pixel.body:setX(pixel.PixelPosition.X * pixel.Size.X * spacing + x - imageWidth / 2)
+                    pixel.body:setY(pixel.PixelPosition.Y * pixel.Size.Y * spacing + y - imageHeight / 2)
                 end
             end
         end
@@ -138,7 +142,10 @@ function love.mousereleased()
             print("HAI")
             for _, image in ipairs(imagesToScale) do
                 for _, pixel in ipairs(image) do
+                    pixel.Scaling = false
                     pixel.shape = love.physics.newRectangleShape(pixel.Size.X, pixel.Size.Y)
+                    pixel.fixture = love.physics.newFixture(pixel.body, pixel.shape)
+                    pixel.fixture:setUserData(pixel.Name)
                 end
             end
         end
@@ -172,9 +179,17 @@ function love.filedropped(file)
         love.window.showMessageBox("Error", "This is not a valid image!", "error", false)
         return
     end
-
+    
     if image:getWidth() * image:getHeight() >= 50*50 then
-        love.window.showMessageBox("Beware!", "This image is quite large! It will probably lag a lot!", "warning", false)
+        local result = love.window.showMessageBox(
+            "Beware!", 
+            "This image is quite large! It will probably lag a lot! \n Are you sure you want to import this image?", 
+            {"Cancel", "Import Anyway"},
+            "warning",
+            false
+        )
+        
+        if result == 1 then return end
     end
     
     local mX, mY = love.mouse.getPosition()
@@ -192,10 +207,10 @@ function love.filedropped(file)
                     Y = y * sizeY * spacing + mY - imageHeight / 2
                 })
                 pixels[imageIndex][i].PixelPosition = {
-                    X = x,
+                    X = x ,
                     Y = y,
                 }
-                pixels[imageIndex][i].ImageSize = {X = imageWidth, Y = imageHeight}
+                pixels[imageIndex][i].ImageSize = {X = image:getWidth(), Y = image:getHeight()}
                 pixels[imageIndex][i]:SetColor(r,g,b,a)
                 pixels[imageIndex][i].Shape = "rectangle"
                 pixels[imageIndex][i].Size = {X = sizeX, Y = sizeY}
