@@ -10,7 +10,7 @@ function scenemgr:NewScene(name)
     }
     
     self.Scenes[name] = o
-
+    
     return o
 end
 

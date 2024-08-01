@@ -7,6 +7,22 @@ local spacing = 1
 local physicsInstace = require("yan.instance.physics_instance")
 local uimgr = require("yan.uimanager")
 local toolbar = require("toolbar")
+local utils = require("yan.utils")
+local imageIndex = 1
+
+function Reset()
+    for ii, image in ipairs(pixels) do
+        for i, pixel in ipairs(image) do
+            pixel.body:setActive(false)
+            pixel = nil
+        end
+        
+        table.remove(pixels, ii)
+    end
+    --world = love.physics.newWorld(0,300,true)
+    pixels = {}
+    imageIndex = 1
+end
 
 function love.load()
     world = love.physics.newWorld(0,300,true)
@@ -18,7 +34,7 @@ function love.load()
     wall.Shape = "rectangle"
     wall.Size = {X = 2000, Y = 50}
 
-    toolbar:Init()
+    toolbar:Init(Reset)
 end
 
 function love.update(dt)
@@ -27,25 +43,9 @@ function love.update(dt)
     end
     wall:Update()
     
-    for _, x in ipairs(pixels) do
-        x:Update()
-    end
-    
-    if love.keyboard.isDown("space") then
-        for _, x in ipairs(pixels) do
-            x:ApplyForce(0,-1000)
-        end
-    end
-
-    if love.keyboard.isDown("a") then
-        for _, x in ipairs(pixels) do
-            x:ApplyForce(-500, 0)
-        end
-    end
-    
-    if love.keyboard.isDown("d") then
-        for _, x in ipairs(pixels) do
-            x:ApplyForce(500, 0)
+    for _, image in ipairs(pixels) do
+        for _, pixel in ipairs(image) do
+            pixel:Update()
         end
     end
     
@@ -53,33 +53,66 @@ function love.update(dt)
 end
 
 function love.draw()
-    for _, x in ipairs(pixels) do
-        x:Draw()
+    for _, image in ipairs(pixels) do
+        for _, pixel in ipairs(image) do
+            pixel:Draw()
+        end
     end
     
     wall:Draw()
-
     uimgr:Draw()
 end
 
 function love.mousemoved(x, y, dx, dy)
-    if love.mouse.isDown(1) and toolbar.tool == "move" then
-        for _, pixel in ipairs(pixels) do
-            pixel.body:setX(pixel.body:getX() + dx)
-            pixel.body:setY(pixel.body:getY() + dy)
+    if love.mouse.isDown(1) then
+        if toolbar.tool == "move" then
+            local imagesToDrag = {}
+
+            for _, image in ipairs(pixels) do
+                for _, pixel in ipairs(image) do
+                    if utils:CheckCollision(x, y, 1, 1, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                        table.insert(imagesToDrag, image)
+                        break
+                    end
+                end
+            end
+            for _, image in ipairs(imagesToDrag) do
+                for _, pixel in ipairs(image) do
+                    pixel.body:setX(pixel.body:getX() + dx)
+                    pixel.body:setY(pixel.body:getY() + dy)
+                end
+            end
+        end
+        
+        if toolbar.tool == "delete" then
+            for _, image in ipairs(pixels) do
+                for i, pixel in ipairs(image) do
+                    if utils:CheckCollision(x, y, 1, 1, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                        table.remove(image, i)
+                        pixel.body:destroy()
+                        pixel.body:release()
+                        pixel.body = nil
+                        pixel = nil
+                        break
+                    end
+                end
+            end
         end
     end
-    
-    
 end
 
+
 function love.filedropped(file)
-    for _, pixel in ipairs(pixels) do
+    local i = 1
+    --[[for _, pixel in ipairs(pixels) do
         pixel.body:destroy()
         pixel = nil
-    end
+    end]]
 
-    pixels = {}
+    pixels[imageIndex] = {}
+    
+    
+    --pixels = {}
     
     file:open("r")
     fileData = file:read("data")
@@ -100,7 +133,7 @@ function love.filedropped(file)
     end
     
     
-    local i = 1
+    
     
     local mX, mY = love.mouse.getPosition()
     
@@ -111,23 +144,20 @@ function love.filedropped(file)
         for y = 0, image:getHeight() - 1 do
             local r, g, b, a = image:getPixel(x,y)
             if a ~= 0 then
-                pixels[i] = physicsInstace:New(nil, world, "dynamic", "rectangle", {X = sizeX, Y = sizeY}, 0, 0, 
+                pixels[imageIndex][i] = physicsInstace:New(nil, world, "dynamic", "rectangle", {X = sizeX, Y = sizeY}, 0, 0, 
                 {
                     X = x * sizeX * spacing + mX - imageWidth / 2, 
                     Y = y * sizeY * spacing + mY - imageHeight / 2
                 })
-                pixels[i]:SetColor(r,g,b,a)
-                pixels[i].Shape = "rectangle"
-                pixels[i].Size = {X = sizeX, Y = sizeY}
+                pixels[imageIndex][i]:SetColor(r,g,b,a)
+                pixels[imageIndex][i].Shape = "rectangle"
+                pixels[imageIndex][i].Size = {X = sizeX, Y = sizeY}
                 i = i + 1
             end
-            
         end
-    
-        
     end
 
-    
+    imageIndex = imageIndex + 1
 
     print("done")
 end

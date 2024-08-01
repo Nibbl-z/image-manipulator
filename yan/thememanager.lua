@@ -1,7 +1,7 @@
 local thememanager = {}
 
 function thememanager:NewTheme()
-    theme = {
+    local theme = {
         Color = {R = 1, G = 1, B = 1, A = 1},
         HoverColor = {R = 0.7, G = 0.7, B = 0.7, A = 1},
         SelectedColor = {R = 0.5, G = 0.5, B = 0.5, A = 1},

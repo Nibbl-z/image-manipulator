@@ -249,10 +249,10 @@ function guiBase:New(o, screen)
     end
 
     function o:ApplyTheme(theme)
-        if o.Type ~= "Image" and o.Type ~= "ImageButton" then
+        if o.Type ~= "Image" then
             o:SetColor(theme:GetColor())
         end
-       
+        
         if o.Type == "TextButton" or o.Type == "TextInput" or o.Type == "ImageButton" then
             function o:MouseEnterDefault()
                 o:SetColor(theme:GetHoverColor())
