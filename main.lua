@@ -27,6 +27,14 @@ function Reset()
     --imageIndex = 1
 end
 
+function SetGravity(gravity)
+    world:setGravity(0,gravity)
+end
+
+function SetExplosionForce(force)
+    explosionForce = force
+end
+
 function love.load()
     world = love.physics.newWorld(0,300,true)
     
@@ -37,7 +45,7 @@ function love.load()
     wall.Shape = "rectangle"
     wall.Size = {X = 2000, Y = 50}
 
-    toolbar:Init(Reset)
+    toolbar:Init(Reset, SetGravity, SetExplosionForce)
 end
 
 function love.update(dt)
@@ -292,4 +300,12 @@ function love.filedropped(file)
     imageIndex = imageIndex + 1
 
     print("done")
+end
+
+function love.keypressed(key, scancode, rep)
+    uimgr:KeyPressed(key, scancode, rep)
+end
+
+function love.textinput(t)
+    uimgr:TextInput(t)
 end

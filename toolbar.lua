@@ -3,12 +3,14 @@ local toolbar = {}
 local screen = require("yan.instance.ui.screen")
 local imagebutton = require("yan.instance.ui.imagebutton")
 local list = require("yan.instance.ui.list")
+local textinput = require("yan.instance.ui.textinput")
+local label = require("yan.instance.ui.label")
 local thememgr = require("yan.thememanager")
 
 toolbar.tool = ""
 toolbar.running = false
 
-function toolbar:Init(resetFunc)
+function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce)
     defaultTheme = thememgr:NewTheme()
     
     selectedTheme = thememgr:NewTheme()
@@ -144,6 +146,46 @@ function toolbar:Init(resetFunc)
     resetTool.MouseDown = function ()
         resetFunc()
     end
+    
+    gravityInput = textinput:New(nil, tools, "300", 16, "left", "center")
+    gravityInput:SetAnchorPoint(1,0)
+    gravityInput:SetPosition(1,-5,0,5)
+    gravityInput:SetSize(0,100,0,50)
+    gravityInput:ApplyTheme(defaultTheme)
+    
+    gravityInput.OnEnter = function ()
+        if tonumber(gravityInput.Text) ~= nil then
+            setGravityFunc(tonumber(gravityInput.Text))
+        else
+            gravityInput.Text = "Invalid Input"
+        end
+    end
+
+    gravityTitle = label:New(nil, tools, "Set Gravity", 16, "right", "center")
+    gravityTitle:SetAnchorPoint(1,0)
+    gravityTitle:SetPosition(1,-110,0,5)
+    gravityTitle:SetSize(0,100,0,50)
+    gravityTitle:SetTextColor(1,1,1,1)
+
+    explosionForceInput = textinput:New(nil, tools, "250000", 16, "left", "center")
+    explosionForceInput:SetAnchorPoint(1,0)
+    explosionForceInput:SetPosition(1,-5,0,60)
+    explosionForceInput:SetSize(0,100,0,50)
+    explosionForceInput:ApplyTheme(defaultTheme)
+    
+    explosionForceInput.OnEnter = function ()
+        if tonumber(explosionForceInput.Text) ~= nil then
+            setExplosionForce(tonumber(explosionForceInput.Text))
+        else
+            explosionForceInput.Text = "Invalid Input"
+        end
+    end
+    
+    explosionForceTitle = label:New(nil, tools, "Set Explosion Force", 16, "right", "center")
+    explosionForceTitle:SetAnchorPoint(1,0)
+    explosionForceTitle:SetPosition(1,-110,0,60)
+    explosionForceTitle:SetSize(0,100,0,50)
+    explosionForceTitle:SetTextColor(1,1,1,1)
 end
 
 function toolbar:UpdateButtons()
