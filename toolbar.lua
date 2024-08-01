@@ -117,10 +117,27 @@ function toolbar:Init(resetFunc)
     end
     
     table.insert(toolbuttons, grabTool)
+    
+    explosionTool = imagebutton:New(nil, tools, "/img/explosion.png")
+    explosionTool:SetSize(0,50,0,50)
+    explosionTool:SetPosition(0,5,0,280)
+    explosionTool.ZIndex = 3
+    explosionTool:ApplyTheme(defaultTheme)
+    
+    explosionTool.MouseDown = function ()
+        if self.tool == "explosion" then
+            self.tool = ""
+        else
+            self.tool = "explosion"
+        end
+        self:UpdateButtons()
+    end
+    
+    table.insert(toolbuttons, explosionTool)
 
     resetTool = imagebutton:New(nil, tools, "/img/reset.png")
     resetTool:SetSize(0,50,0,50)
-    resetTool:SetPosition(0,5,0,280)
+    resetTool:SetPosition(0,5,0,335)
     resetTool.ZIndex = 3
     resetTool:ApplyTheme(defaultTheme)
     
@@ -142,6 +159,8 @@ function toolbar:UpdateButtons()
         scaleTool:ApplyTheme(selectedTheme)
     elseif self.tool == "grab" then
         grabTool:ApplyTheme(selectedTheme)
+    elseif self.tool == "explosion" then
+        explosionTool:ApplyTheme(selectedTheme)
     end
 end
 

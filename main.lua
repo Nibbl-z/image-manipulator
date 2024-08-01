@@ -4,6 +4,7 @@ local sizeX = 10
 local sizeY = 10
 local spacing = 1
 local grabSpeed = 200
+local explosionForce = 250000
 local physicsInstace = require("yan.instance.physics_instance")
 local uimgr = require("yan.uimanager")
 local toolbar = require("toolbar")
@@ -100,7 +101,7 @@ function love.draw()
     wall:Draw()
     uimgr:Draw()
     
-    if toolbar.tool == "delete" or toolbar.tool == "grab" then
+    if toolbar.tool == "delete" or toolbar.tool == "grab" or toolbar.tool == "explosion" then
         local mX, mY = love.mouse.getPosition()
         love.graphics.setColor(1,1,1,1)
         love.graphics.circle("line", mX, mY, brushSize)
@@ -174,6 +175,38 @@ function love.mousemoved(x, y, dx, dy)
     end
 end
 
+function love.mousepressed(x,y,button)
+    if button ~= 1 then return end
+    
+    if toolbar.tool == "explosion" then
+        for _, image in ipairs(pixels) do
+            for _, pixel in ipairs(image) do
+                if utils:CheckCollision(x, y, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), pixel.Size.X, pixel.Size.Y) then
+                    local forceX, forceY = 0,0 
+                    
+                    if pixel.body:getX() < x then
+                        forceX = -explosionForce
+                    end
+                    
+                    if pixel.body:getX() > x then
+                        forceX = explosionForce
+                    end
+                    
+                    if pixel.body:getY() < y then
+                        forceY = -explosionForce
+                    end
+                    
+                    if pixel.body:getY() > y then
+                        forceY = explosionForce
+                    end
+                    
+                    pixel.body:applyForce(forceX, forceY)
+                end
+            end
+        end
+    end
+end
+
 function love.mousereleased()
     if toolbar.tool == "scale" then
         if #imagesToScale > 0 then
@@ -193,7 +226,7 @@ function love.mousereleased()
 end
 
 function love.wheelmoved(x, y)
-    if toolbar.tool == "delete" or toolbar.tool == "grab" then
+    if toolbar.tool == "delete" or toolbar.tool == "grab" or toolbar.tool == "explosion" then
         brushSize = utils:Clamp(brushSize + y, 5, 10000)
     end
 end
