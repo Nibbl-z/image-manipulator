@@ -3,7 +3,7 @@ local pixels = {}
 local sizeX = 10
 local sizeY = 10
 local spacing = 1
-
+local grabSpeed = 200
 local physicsInstace = require("yan.instance.physics_instance")
 local uimgr = require("yan.uimanager")
 local toolbar = require("toolbar")
@@ -11,6 +11,8 @@ local utils = require("yan.utils")
 local imageIndex = 1
 
 local toClear = {}
+
+local brushSize = 50
 
 function Reset()
     for ii, image in ipairs(pixels) do
@@ -54,6 +56,38 @@ function love.update(dt)
     for _, v in ipairs(toClear) do
         v.body:destroy()
     end
+    
+    local mX, mY = love.mouse.getPosition()
+    
+    if toolbar.tool == "grab" and love.mouse.isDown(1) then
+        for _, image in ipairs(pixels) do
+            for _, pixel in ipairs(image) do
+                if utils:CheckCollision(mX, mY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), pixel.Size.X, pixel.Size.Y) then
+                    local forceX, forceY = 0,0 
+                    
+                    if pixel.body:getX() < mX then
+                        forceX = grabSpeed
+                    end
+                    
+                    if pixel.body:getX() > mX then
+                        forceX = -grabSpeed
+                    end
+                    
+                    if pixel.body:getY() < mY then
+                        forceY = grabSpeed
+                    end
+                    
+                    if pixel.body:getY() > mY then
+                        forceY = -grabSpeed
+                    end
+                    pixel.body:setGravityScale(0)
+                    pixel.body:applyForce(forceX, forceY)
+                else
+                    pixel.body:setGravityScale(1)
+                end
+            end
+        end
+    end
 end
 
 function love.draw()
@@ -65,11 +99,15 @@ function love.draw()
     
     wall:Draw()
     uimgr:Draw()
+    
+    if toolbar.tool == "delete" or toolbar.tool == "grab" then
+        local mX, mY = love.mouse.getPosition()
+        love.graphics.setColor(1,1,1,1)
+        love.graphics.circle("line", mX, mY, brushSize)
+    end
 end
 local imagesToScale = {}
 function love.mousemoved(x, y, dx, dy)
-    
-
     if love.mouse.isDown(1) then
         if toolbar.tool == "move" then
             local imagesToDrag = {}
@@ -93,7 +131,7 @@ function love.mousemoved(x, y, dx, dy)
         if toolbar.tool == "delete" then
             for _, image in ipairs(pixels) do
                 for i, pixel in ipairs(image) do
-                    if utils:CheckCollision(x, y, 30, 30, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                    if utils:CheckCollision(x, y, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
                         table.remove(image, i)
                         pixel.body:destroy()
                         pixel.body:release()
@@ -143,7 +181,7 @@ function love.mousereleased()
             for _, image in ipairs(imagesToScale) do
                 for _, pixel in ipairs(image) do
                     pixel.Scaling = false
-                    pixel.shape = love.physics.newRectangleShape(pixel.Size.X, pixel.Size.Y)
+                    pixel.shape = love.physics.newRectangleShape(math.abs(pixel.Size.X), math.abs(pixel.Size.Y))
                     pixel.fixture = love.physics.newFixture(pixel.body, pixel.shape)
                     pixel.fixture:setUserData(pixel.Name)
                 end
@@ -154,18 +192,17 @@ function love.mousereleased()
     imagesToScale = {}
 end
 
+function love.wheelmoved(x, y)
+    if toolbar.tool == "delete" or toolbar.tool == "grab" then
+        brushSize = utils:Clamp(brushSize + y, 5, 10000)
+    end
+end
+
 function love.filedropped(file)
     local i = 1
-    --[[for _, pixel in ipairs(pixels) do
-        pixel.body:destroy()
-        pixel = nil
-    end]]
 
     pixels[imageIndex] = {}
-    
-    
-    --pixels = {}
-    
+ 
     file:open("r")
     fileData = file:read("data")
     

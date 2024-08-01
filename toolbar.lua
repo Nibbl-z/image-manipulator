@@ -83,16 +83,6 @@ function toolbar:Init(resetFunc)
 
     table.insert(toolbuttons, deleteTool)
 
-    resetTool = imagebutton:New(nil, tools, "/img/reset.png")
-    resetTool:SetSize(0,50,0,50)
-    resetTool:SetPosition(0,5,0,225)
-    resetTool.ZIndex = 3
-    resetTool:ApplyTheme(defaultTheme)
-    
-    resetTool.MouseDown = function ()
-        resetFunc()
-    end
-    
     scaleTool = imagebutton:New(nil, tools, "/img/scale.png")
     scaleTool:SetSize(0,50,0,50)
     scaleTool:SetPosition(0,5,0,170)
@@ -108,8 +98,35 @@ function toolbar:Init(resetFunc)
         end
         self:UpdateButtons()
     end
-
+    
     table.insert(toolbuttons, scaleTool)
+
+    grabTool = imagebutton:New(nil, tools, "/img/grab.png")
+    grabTool:SetSize(0,50,0,50)
+    grabTool:SetPosition(0,5,0,225)
+    grabTool.ZIndex = 3
+    grabTool:ApplyTheme(defaultTheme)
+    
+    grabTool.MouseDown = function ()
+        if self.tool == "grab" then
+            self.tool = ""
+        else
+            self.tool = "grab"
+        end
+        self:UpdateButtons()
+    end
+    
+    table.insert(toolbuttons, grabTool)
+
+    resetTool = imagebutton:New(nil, tools, "/img/reset.png")
+    resetTool:SetSize(0,50,0,50)
+    resetTool:SetPosition(0,5,0,280)
+    resetTool.ZIndex = 3
+    resetTool:ApplyTheme(defaultTheme)
+    
+    resetTool.MouseDown = function ()
+        resetFunc()
+    end
 end
 
 function toolbar:UpdateButtons()
@@ -123,6 +140,8 @@ function toolbar:UpdateButtons()
         deleteTool:ApplyTheme(selectedTheme)
     elseif self.tool == "scale" then
         scaleTool:ApplyTheme(selectedTheme)
+    elseif self.tool == "grab" then
+        grabTool:ApplyTheme(selectedTheme)
     end
 end
 
