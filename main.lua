@@ -66,8 +66,10 @@ function love.draw()
     wall:Draw()
     uimgr:Draw()
 end
-
+local imagesToScale = {}
 function love.mousemoved(x, y, dx, dy)
+    
+
     if love.mouse.isDown(1) then
         if toolbar.tool == "move" then
             local imagesToDrag = {}
@@ -102,9 +104,48 @@ function love.mousemoved(x, y, dx, dy)
                 end
             end
         end
+        
+        if toolbar.tool == "scale" then
+            if #imagesToScale == 0 then
+                for _, image in ipairs(pixels) do
+                    for _, pixel in ipairs(image) do
+                        if utils:CheckCollision(x, y, 4, 4, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                            
+                            table.insert(imagesToScale, image)
+                            break
+                        end
+                    end
+                end
+            end
+            
+            for _, image in ipairs(imagesToScale) do
+                for _, pixel in ipairs(image) do
+                    print("literaly image")
+                    pixel.Size.X = pixel.Size.X + dx / 32
+                    pixel.Size.Y = pixel.Size.Y + dy / 32
+                    
+                    pixel.body:setX(pixel.PixelPosition.X * pixel.Size.X * spacing - pixel.ImageSize.X / 2)
+                    pixel.body:setY(pixel.PixelPosition.Y * pixel.Size.Y * spacing - pixel.ImageSize.Y / 2)
+                end
+            end
+        end
     end
 end
 
+function love.mousereleased()
+    if toolbar.tool == "scale" then
+        if #imagesToScale > 0 then
+            print("HAI")
+            for _, image in ipairs(imagesToScale) do
+                for _, pixel in ipairs(image) do
+                    pixel.shape = love.physics.newRectangleShape(pixel.Size.X, pixel.Size.Y)
+                end
+            end
+        end
+    end
+
+    imagesToScale = {}
+end
 
 function love.filedropped(file)
     local i = 1
@@ -136,9 +177,6 @@ function love.filedropped(file)
         love.window.showMessageBox("Beware!", "This image is quite large! It will probably lag a lot!", "warning", false)
     end
     
-    
-    
-    
     local mX, mY = love.mouse.getPosition()
     
     local imageWidth = image:getWidth() * spacing * sizeX
@@ -153,6 +191,11 @@ function love.filedropped(file)
                     X = x * sizeX * spacing + mX - imageWidth / 2, 
                     Y = y * sizeY * spacing + mY - imageHeight / 2
                 })
+                pixels[imageIndex][i].PixelPosition = {
+                    X = x,
+                    Y = y,
+                }
+                pixels[imageIndex][i].ImageSize = {X = imageWidth, Y = imageHeight}
                 pixels[imageIndex][i]:SetColor(r,g,b,a)
                 pixels[imageIndex][i].Shape = "rectangle"
                 pixels[imageIndex][i].Size = {X = sizeX, Y = sizeY}

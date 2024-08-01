@@ -38,7 +38,7 @@ function physicsInstance:New(o, world, bodyType, shape, size, restitution, dampi
         
         if maxX and maxY then
             local vX, vY = o.body:getLinearVelocity()
-
+            
             if vX > maxX then 
                 vX = maxX
             elseif vX < -maxX then 

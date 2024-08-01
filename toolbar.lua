@@ -70,7 +70,7 @@ function toolbar:Init(resetFunc)
     deleteTool:SetPosition(0,5,0,115)
     deleteTool.ZIndex = 3
     deleteTool:ApplyTheme(defaultTheme)
-
+    
     deleteTool.MouseDown = function ()
 
         if self.tool == "delete" then
@@ -85,13 +85,31 @@ function toolbar:Init(resetFunc)
 
     resetTool = imagebutton:New(nil, tools, "/img/reset.png")
     resetTool:SetSize(0,50,0,50)
-    resetTool:SetPosition(0,5,0,170)
+    resetTool:SetPosition(0,5,0,225)
     resetTool.ZIndex = 3
     resetTool:ApplyTheme(defaultTheme)
     
     resetTool.MouseDown = function ()
         resetFunc()
     end
+    
+    scaleTool = imagebutton:New(nil, tools, "/img/scale.png")
+    scaleTool:SetSize(0,50,0,50)
+    scaleTool:SetPosition(0,5,0,170)
+    scaleTool.ZIndex = 3
+    scaleTool:ApplyTheme(defaultTheme)
+    
+    scaleTool.MouseDown = function ()
+        self.running = false
+        if self.tool == "scale" then
+            self.tool = ""
+        else
+            self.tool = "scale"
+        end
+        self:UpdateButtons()
+    end
+
+    table.insert(toolbuttons, scaleTool)
 end
 
 function toolbar:UpdateButtons()
@@ -103,6 +121,8 @@ function toolbar:UpdateButtons()
         moveTool:ApplyTheme(selectedTheme)
     elseif self.tool == "delete" then
         deleteTool:ApplyTheme(selectedTheme)
+    elseif self.tool == "scale" then
+        scaleTool:ApplyTheme(selectedTheme)
     end
 end
 
