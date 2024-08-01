@@ -22,7 +22,7 @@ function physicsInstance:New(o, world, bodyType, shape, size, restitution, dampi
     
     function o:Update()
         if o.SceneEnabled == false then return end
-
+        
         o.Position.X = o.body:getX()
         o.Position.Y = o.body:getY()
     end 

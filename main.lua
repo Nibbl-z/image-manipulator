@@ -10,18 +10,18 @@ local toolbar = require("toolbar")
 local utils = require("yan.utils")
 local imageIndex = 1
 
+local toClear = {}
+
 function Reset()
     for ii, image in ipairs(pixels) do
         for i, pixel in ipairs(image) do
             pixel.body:setActive(false)
-            pixel = nil
+            pixel.SceneEnabled = false
         end
-        
-        table.remove(pixels, ii)
     end
     --world = love.physics.newWorld(0,300,true)
-    pixels = {}
-    imageIndex = 1
+    --pixels = {}
+    --imageIndex = 1
 end
 
 function love.load()
@@ -50,6 +50,10 @@ function love.update(dt)
     end
     
     uimgr:Update()
+
+    for _, v in ipairs(toClear) do
+        v.body:destroy()
+    end
 end
 
 function love.draw()
@@ -70,7 +74,7 @@ function love.mousemoved(x, y, dx, dy)
 
             for _, image in ipairs(pixels) do
                 for _, pixel in ipairs(image) do
-                    if utils:CheckCollision(x, y, 1, 1, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                    if utils:CheckCollision(x, y, 4, 4, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
                         table.insert(imagesToDrag, image)
                         break
                     end
@@ -87,7 +91,7 @@ function love.mousemoved(x, y, dx, dy)
         if toolbar.tool == "delete" then
             for _, image in ipairs(pixels) do
                 for i, pixel in ipairs(image) do
-                    if utils:CheckCollision(x, y, 1, 1, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                    if utils:CheckCollision(x, y, 30, 30, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
                         table.remove(image, i)
                         pixel.body:destroy()
                         pixel.body:release()
