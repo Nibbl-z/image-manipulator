@@ -11,6 +11,8 @@ toolbar.tool = ""
 toolbar.running = false
 
 function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, setYScale)
+    clickSfx = love.audio.newSource("/audio/select.wav", "static")
+    
     defaultTheme = thememgr:NewTheme()
     defaultTheme.CornerRoundness = 4
     
@@ -41,6 +43,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     playTool:ApplyTheme(defaultTheme)
     
     playTool.MouseDown = function ()
+        clickSfx:play()
         self.running = not self.running
 
         if self.running then
@@ -57,6 +60,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     moveTool:ApplyTheme(defaultTheme)
 
     moveTool.MouseDown = function ()
+        clickSfx:play()
         if self.tool == "move" then
             self.tool = ""
         else
@@ -75,7 +79,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     deleteTool:ApplyTheme(defaultTheme)
     
     deleteTool.MouseDown = function ()
-
+        clickSfx:play()
         if self.tool == "delete" then
             self.tool = ""
         else
@@ -93,6 +97,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     deleteImgTool:ApplyTheme(defaultTheme)
     
     deleteImgTool.MouseDown = function ()
+        clickSfx:play()
         if self.tool == "deleteimage" then
             self.tool = ""
         else
@@ -110,6 +115,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     scaleTool:ApplyTheme(defaultTheme)
     
     scaleTool.MouseDown = function ()
+        clickSfx:play()
         self.running = false
         if self.tool == "scale" then
             self.tool = ""
@@ -128,6 +134,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     grabTool:ApplyTheme(defaultTheme)
     
     grabTool.MouseDown = function ()
+        clickSfx:play()
         if self.tool == "grab" then
             self.tool = ""
         else
@@ -145,6 +152,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     explosionTool:ApplyTheme(defaultTheme)
     
     explosionTool.MouseDown = function ()
+        clickSfx:play()
         if self.tool == "explosion" then
             self.tool = ""
         else
@@ -162,6 +170,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     buildTool:ApplyTheme(defaultTheme)
     
     buildTool.MouseDown = function ()
+        clickSfx:play()
         if self.tool == "build" then
             self.tool = ""
         else
@@ -179,6 +188,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     deletePlatformTool:ApplyTheme(defaultTheme)
     
     deletePlatformTool.MouseDown = function ()
+        clickSfx:play()
         if self.tool == "deleteplatform" then
             self.tool = ""
         else
@@ -196,6 +206,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     resetTool:ApplyTheme(defaultTheme)
     
     resetTool.MouseDown = function ()
+        clickSfx:play()
         resetFunc()
     end
     
@@ -205,6 +216,10 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     gravityInput:SetSize(0,100,0,50)
     gravityInput:ApplyTheme(defaultTheme)
     
+    gravityInput.MouseDown = function ()
+        clickSfx:play()
+    end
+
     gravityInput.OnEnter = function ()
         if tonumber(gravityInput.Text) ~= nil then
             setGravityFunc(tonumber(gravityInput.Text))
@@ -225,6 +240,10 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     explosionForceInput:SetSize(0,100,0,50)
     explosionForceInput:ApplyTheme(defaultTheme)
     
+    explosionForceInput.MouseDown = function ()
+        clickSfx:play()
+    end
+
     explosionForceInput.OnEnter = function ()
         if tonumber(explosionForceInput.Text) ~= nil then
             setExplosionForce(tonumber(explosionForceInput.Text))
@@ -245,6 +264,10 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     sizeXInput:SetSize(0,100,0,50)
     sizeXInput:ApplyTheme(defaultTheme)
     
+    sizeXInput.MouseDown = function ()
+        clickSfx:play()
+    end
+
     sizeXInput.OnEnter = function ()
         if tonumber(sizeXInput.Text) ~= nil then
             setXScale(tonumber(sizeXInput.Text))
@@ -271,6 +294,10 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
         else
             sizeYInput.Text = "Invalid Input"
         end
+    end
+
+    sizeYInput.MouseDown = function ()
+        clickSfx:play()
     end
     
     sizeYTitle = label:New(nil, tools, "Default Y Scale", 16, "right", "center")

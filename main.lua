@@ -67,7 +67,13 @@ function love.load()
     bgImage = love.graphics.newImage("/img/bg.png")
     bgImage:setWrap("repeat", "repeat")
     bgQuad = love.graphics.newQuad(0, 0, 200000, 200000, 100, 100)
+    
+    placeSfx = love.audio.newSource("/audio/place.wav", "static")
+    explosionSfx = love.audio.newSource("/audio/explosion.wav", "static")
+    deleteSfx = love.audio.newSource("/audio/delete.wav", "static")
+    pixelDeleteSfx = love.audio.newSource("/audio/pixelDelete.wav", "static")
 end
+
 local directions = {a = {1,0}, d = {-1,0}, w = {0,1}, s = {0,-1}}
 function love.update(dt)
     if toolbar.running then 
@@ -187,6 +193,8 @@ function love.mousemoved(x, y, dx, dy)
         end
         
         if toolbar.tool == "delete" then
+            local didDelete = false
+
             for _, image in ipairs(pixels) do
                 for i, pixel in ipairs(image) do
                     if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
@@ -195,9 +203,14 @@ function love.mousemoved(x, y, dx, dy)
                         pixel.body:release()
                         pixel.body = nil
                         pixel = nil
+                        didDelete = true
                         break
                     end
                 end
+            end
+
+            if didDelete then
+                pixelDeleteSfx:play()
             end
         end
         
@@ -212,8 +225,11 @@ function love.mousemoved(x, y, dx, dy)
                     end
                 end
             end
-            
+            if #toDelete >= 1 then
+                deleteSfx:clone():play()
+            end
             for _, image in ipairs(toDelete) do
+                
                 for i, pixel in ipairs(image) do
                     pixel.body:setActive(false)
                     pixel.SceneEnabled = false
@@ -287,6 +303,8 @@ function love.mousepressed(x,y,button)
                 end
             end
         end
+
+        explosionSfx:clone():play()
     end
     
     if toolbar.tool == "build" then
@@ -296,8 +314,11 @@ function love.mousepressed(x,y,button)
     end
     
     if toolbar.tool == "deleteplatform" then
+        local didDelete = false
+
         for i, platform in ipairs(platforms) do
             if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, platform.body:getX(), platform.body:getY(), platform.Size.X, platform.Size.Y) then
+                didDelete = true
                 table.remove(platforms, i)
                 platform.body:destroy()
                 platform.body:release()
@@ -306,9 +327,14 @@ function love.mousepressed(x,y,button)
                 break
             end
         end
+
+        if didDelete then
+            deleteSfx:clone():play()
+        end
     end
 
     if toolbar.tool == "delete" then
+        local didDelete = false
         for _, image in ipairs(pixels) do
             for i, pixel in ipairs(image) do
                 if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
@@ -317,9 +343,14 @@ function love.mousepressed(x,y,button)
                     pixel.body:release()
                     pixel.body = nil
                     pixel = nil
+                    didDelete = true
                     break
                 end
             end
+        end
+
+        if didDelete then
+            pixelDeleteSfx:play()
         end
     end
 
@@ -334,7 +365,9 @@ function love.mousepressed(x,y,button)
                 end
             end
         end
-
+        if #toDelete >= 1 then
+            deleteSfx:clone():play()
+        end
         for _, image in ipairs(toDelete) do
             for i, pixel in ipairs(image) do
                 pixel.body:setActive(false)
@@ -360,6 +393,8 @@ function love.mousereleased()
 
     if toolbar.tool == "build" then
         if currentPlatform ~= nil then
+            placeSfx:clone():play()
+
             if currentPlatform.W <= 0 then
                 currentPlatform.X = currentPlatform.X + currentPlatform.W
                 currentPlatform.W = math.abs(currentPlatform.W)
@@ -454,6 +489,8 @@ function love.filedropped(file)
     end
 
     imageIndex = imageIndex + 1
+
+    placeSfx:play()
 
     print("done")
 end
