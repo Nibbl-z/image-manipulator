@@ -118,8 +118,6 @@ function love.update(dt)
 
     cameraX = cameraX + cX
     cameraY = cameraY + cY
-
-    print(cameraX, cameraY)
     
     cX, cY = 0,0
 end
@@ -142,7 +140,7 @@ function love.draw()
 
     uimgr:Draw()
     
-    if toolbar.tool == "delete" or toolbar.tool == "grab" or toolbar.tool == "explosion" then
+    if toolbar.tool == "delete" or toolbar.tool == "grab" or toolbar.tool == "explosion" or toolbar.tool == "deleteimage" or toolbar.tool == "deleteplatform" then
         local mX, mY = love.mouse.getPosition()
         love.graphics.setColor(1,1,1,1)
         love.graphics.circle("line", mX, mY, brushSize)
@@ -185,6 +183,26 @@ function love.mousemoved(x, y, dx, dy)
             end
         end
         
+        if toolbar.tool == "deleteimage" then
+            local toDelete = {}
+            
+            for _, image in ipairs(pixels) do
+                for i, pixel in ipairs(image) do
+                    if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                        table.insert(toDelete, image)
+                        break
+                    end
+                end
+            end
+            
+            for _, image in ipairs(toDelete) do
+                for i, pixel in ipairs(image) do
+                    pixel.body:setActive(false)
+                    pixel.SceneEnabled = false
+                end
+            end
+        end
+        
         if toolbar.tool == "scale" then
             if #imagesToScale == 0 then
                 for _, image in ipairs(pixels) do
@@ -200,7 +218,6 @@ function love.mousemoved(x, y, dx, dy)
             
             for _, image in ipairs(imagesToScale) do
                 for _, pixel in ipairs(image) do
-                    print("literaly image")
                     pixel.Scaling = true
                     pixel.Size.X = pixel.Size.X + dx / pixel.ImageSize.X * 2
                     pixel.Size.Y = pixel.Size.Y + dy / pixel.ImageSize.Y * 2
@@ -259,7 +276,7 @@ function love.mousepressed(x,y,button)
             currentPlatform = {X = x, Y = y, W = 1, H = 1}
         end
     end
-
+    
     if toolbar.tool == "deleteplatform" then
         for i, platform in ipairs(platforms) do
             if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, platform.body:getX(), platform.body:getY(), platform.Size.X, platform.Size.Y) then
@@ -272,12 +289,46 @@ function love.mousepressed(x,y,button)
             end
         end
     end
+
+    if toolbar.tool == "delete" then
+        for _, image in ipairs(pixels) do
+            for i, pixel in ipairs(image) do
+                if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                    table.remove(image, i)
+                    pixel.body:destroy()
+                    pixel.body:release()
+                    pixel.body = nil
+                    pixel = nil
+                    break
+                end
+            end
+        end
+    end
+
+    if toolbar.tool == "deleteimage" then
+        local toDelete = {}
+        
+        for _, image in ipairs(pixels) do
+            for i, pixel in ipairs(image) do
+                if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                    table.insert(toDelete, image)
+                    break
+                end
+            end
+        end
+
+        for _, image in ipairs(toDelete) do
+            for i, pixel in ipairs(image) do
+                pixel.body:setActive(false)
+                pixel.SceneEnabled = false
+            end
+        end
+    end
 end
 
 function love.mousereleased()
     if toolbar.tool == "scale" then
         if #imagesToScale > 0 then
-            print("HAI")
             for _, image in ipairs(imagesToScale) do
                 for _, pixel in ipairs(image) do
                     pixel.Scaling = false
@@ -319,7 +370,7 @@ function love.mousereleased()
 end
 
 function love.wheelmoved(x, y)
-    if toolbar.tool == "delete" or toolbar.tool == "grab" or toolbar.tool == "explosion" then
+    if toolbar.tool == "delete" or toolbar.tool == "grab" or toolbar.tool == "explosion" or toolbar.tool == "deleteimage" or toolbar.tool == "deleteplatform"  then
         brushSize = utils:Clamp(brushSize + y, 5, 10000)
     end
 end
@@ -379,6 +430,8 @@ function love.filedropped(file)
                 pixels[imageIndex][i].Size = {X = sizeX, Y = sizeY}
                 i = i + 1
             end
+            
+            
         end
     end
 

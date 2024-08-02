@@ -86,9 +86,26 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
 
     table.insert(toolbuttons, deleteTool)
 
+    deleteImgTool = imagebutton:New(nil, tools, "/img/delete_image.png")
+    deleteImgTool:SetSize(0,50,0,50)
+    deleteImgTool:SetPosition(0,5,0,170)
+    deleteImgTool.ZIndex = 3
+    deleteImgTool:ApplyTheme(defaultTheme)
+    
+    deleteImgTool.MouseDown = function ()
+        if self.tool == "deleteimage" then
+            self.tool = ""
+        else
+            self.tool = "deleteimage"
+        end
+        self:UpdateButtons()
+    end
+
+    table.insert(toolbuttons, deleteImgTool)
+
     scaleTool = imagebutton:New(nil, tools, "/img/scale.png")
     scaleTool:SetSize(0,50,0,50)
-    scaleTool:SetPosition(0,5,0,170)
+    scaleTool:SetPosition(0,5,0,225)
     scaleTool.ZIndex = 3
     scaleTool:ApplyTheme(defaultTheme)
     
@@ -106,7 +123,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
 
     grabTool = imagebutton:New(nil, tools, "/img/grab.png")
     grabTool:SetSize(0,50,0,50)
-    grabTool:SetPosition(0,5,0,225)
+    grabTool:SetPosition(0,5,0,280)
     grabTool.ZIndex = 3
     grabTool:ApplyTheme(defaultTheme)
     
@@ -123,7 +140,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     
     explosionTool = imagebutton:New(nil, tools, "/img/explosion.png")
     explosionTool:SetSize(0,50,0,50)
-    explosionTool:SetPosition(0,5,0,280)
+    explosionTool:SetPosition(0,5,0,335)
     explosionTool.ZIndex = 3
     explosionTool:ApplyTheme(defaultTheme)
     
@@ -140,7 +157,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
 
     buildTool = imagebutton:New(nil, tools, "/img/build_platform.png")
     buildTool:SetSize(0,50,0,50)
-    buildTool:SetPosition(0,5,0,335)
+    buildTool:SetPosition(0,5,0,390)
     buildTool.ZIndex = 3
     buildTool:ApplyTheme(defaultTheme)
     
@@ -157,7 +174,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     
     deletePlatformTool = imagebutton:New(nil, tools, "/img/delete_platform.png")
     deletePlatformTool:SetSize(0,50,0,50)
-    deletePlatformTool:SetPosition(0,5,0,390)
+    deletePlatformTool:SetPosition(0,5,0,445)
     deletePlatformTool.ZIndex = 3
     deletePlatformTool:ApplyTheme(defaultTheme)
     
@@ -174,7 +191,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
 
     resetTool = imagebutton:New(nil, tools, "/img/reset.png")
     resetTool:SetSize(0,50,0,50)
-    resetTool:SetPosition(0,5,0,445)
+    resetTool:SetPosition(0,5,0,500)
     resetTool.ZIndex = 3
     resetTool:ApplyTheme(defaultTheme)
     
@@ -272,6 +289,8 @@ function toolbar:UpdateButtons()
         moveTool:ApplyTheme(selectedTheme)
     elseif self.tool == "delete" then
         deleteTool:ApplyTheme(selectedTheme)
+    elseif self.tool == "deleteimage" then
+        deleteImgTool:ApplyTheme(selectedTheme)
     elseif self.tool == "scale" then
         scaleTool:ApplyTheme(selectedTheme)
     elseif self.tool == "grab" then
