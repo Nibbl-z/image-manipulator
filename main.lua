@@ -15,6 +15,8 @@ local toClear = {}
 
 local brushSize = 50
 
+local platforms = {}
+
 function Reset()
     for ii, image in ipairs(pixels) do
         for i, pixel in ipairs(image) do
@@ -35,24 +37,35 @@ function SetExplosionForce(force)
     explosionForce = force
 end
 
+function SetXScale(scale)
+    sizeX = scale
+end
+
+function SetYScale(scale)
+    sizeY = scale
+end
+
 function love.load()
+    love.window.setMode(800, 600, {resizable = true})
+    love.window.setTitle("Image Playground")
+
     world = love.physics.newWorld(0,300,true)
     
-    wall = physicsInstace:New(nil, world, "static", "rectangle", {X = 2000, Y = 50}, 0, 0, {X = 0, Y = 500})
+    --[[wall = physicsInstace:New(nil, world, "static", "rectangle", {X = 2000, Y = 50}, 0, 0, {X = 0, Y = 500})
     wall.body:setX(0)
     wall.body:setY(500)
     wall:SetColor(1,1,1,1)
     wall.Shape = "rectangle"
-    wall.Size = {X = 2000, Y = 50}
+    wall.Size = {X = 2000, Y = 50}]]
 
-    toolbar:Init(Reset, SetGravity, SetExplosionForce)
+    toolbar:Init(Reset, SetGravity, SetExplosionForce, SetXScale, SetYScale)
 end
 
 function love.update(dt)
     if toolbar.running then 
         world:update(dt) 
     end
-    wall:Update()
+    --wall:Update()
     
     for _, image in ipairs(pixels) do
         for _, pixel in ipairs(image) do
@@ -106,7 +119,7 @@ function love.draw()
         end
     end
     
-    wall:Draw()
+    --wall:Draw()
     uimgr:Draw()
     
     if toolbar.tool == "delete" or toolbar.tool == "grab" or toolbar.tool == "explosion" then

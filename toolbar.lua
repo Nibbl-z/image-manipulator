@@ -10,8 +10,9 @@ local thememgr = require("yan.thememanager")
 toolbar.tool = ""
 toolbar.running = false
 
-function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce)
+function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, setYScale)
     defaultTheme = thememgr:NewTheme()
+    defaultTheme.CornerRoundness = 4
     
     selectedTheme = thememgr:NewTheme()
     selectedTheme:SetColor(0.5,0.5,0.5,1)
@@ -186,6 +187,46 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce)
     explosionForceTitle:SetPosition(1,-110,0,60)
     explosionForceTitle:SetSize(0,100,0,50)
     explosionForceTitle:SetTextColor(1,1,1,1)
+    
+    sizeXInput = textinput:New(nil, tools, "10", 16, "left", "center")
+    sizeXInput:SetAnchorPoint(1,0)
+    sizeXInput:SetPosition(1,-5,0,115)
+    sizeXInput:SetSize(0,100,0,50)
+    sizeXInput:ApplyTheme(defaultTheme)
+    
+    sizeXInput.OnEnter = function ()
+        if tonumber(sizeXInput.Text) ~= nil then
+            setXScale(tonumber(sizeXInput.Text))
+        else
+            sizeXInput.Text = "Invalid Input"
+        end
+    end
+    
+    sizeXTitle = label:New(nil, tools, "Default X Scale", 16, "right", "center")
+    sizeXTitle:SetAnchorPoint(1,0)
+    sizeXTitle:SetPosition(1,-110,0,115)
+    sizeXTitle:SetSize(0,100,0,50)
+    sizeXTitle:SetTextColor(1,1,1,1)
+    
+    sizeYInput = textinput:New(nil, tools, "10", 16, "left", "center")
+    sizeYInput:SetAnchorPoint(1,0)
+    sizeYInput:SetPosition(1,-5,0,170)
+    sizeYInput:SetSize(0,100,0,50)
+    sizeYInput:ApplyTheme(defaultTheme)
+    
+    sizeYInput.OnEnter = function ()
+        if tonumber(sizeYInput.Text) ~= nil then
+            setYScale(tonumber(sizeYInput.Text))
+        else
+            sizeYInput.Text = "Invalid Input"
+        end
+    end
+    
+    sizeYTitle = label:New(nil, tools, "Default Y Scale", 16, "right", "center")
+    sizeYTitle:SetAnchorPoint(1,0)
+    sizeYTitle:SetPosition(1,-110,0,170)
+    sizeYTitle:SetSize(0,100,0,50)
+    sizeYTitle:SetTextColor(1,1,1,1)
 end
 
 function toolbar:UpdateButtons()
