@@ -259,6 +259,19 @@ function love.mousepressed(x,y,button)
             currentPlatform = {X = x, Y = y, W = 1, H = 1}
         end
     end
+
+    if toolbar.tool == "deleteplatform" then
+        for i, platform in ipairs(platforms) do
+            if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, platform.body:getX(), platform.body:getY(), platform.Size.X, platform.Size.Y) then
+                table.remove(platforms, i)
+                platform.body:destroy()
+                platform.body:release()
+                platform.body = nil
+                platform = nil
+                break
+            end
+        end
+    end
 end
 
 function love.mousereleased()
