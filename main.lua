@@ -20,7 +20,7 @@ local platforms = {}
 
 local cX, cY = 0, 0
 local cameraX, cameraY = 0, 0
-local camSpeed = 300
+local camSpeed = 500
 
 function Reset()
     for ii, image in ipairs(pixels) do
@@ -29,6 +29,12 @@ function Reset()
             pixel.SceneEnabled = false
         end
     end
+
+    for i, platform in ipairs(platforms) do
+        platform.body:setActive(false)
+        platform.SceneEnabled = false
+    end
+
     --world = love.physics.newWorld(0,300,true)
     --pixels = {}
     --imageIndex = 1
@@ -57,6 +63,10 @@ function love.load()
     world = love.physics.newWorld(0,300,true)
 
     toolbar:Init(Reset, SetGravity, SetExplosionForce, SetXScale, SetYScale)
+
+    bgImage = love.graphics.newImage("/img/bg.png")
+    bgImage:setWrap("repeat", "repeat")
+    bgQuad = love.graphics.newQuad(0, 0, 200000, 200000, 100, 100)
 end
 local directions = {a = {1,0}, d = {-1,0}, w = {0,1}, s = {0,-1}}
 function love.update(dt)
@@ -108,7 +118,13 @@ function love.update(dt)
             end
         end
     end
-
+    
+    if love.keyboard.isDown("lshift") then
+        camSpeed = 1000
+    else
+        camSpeed = 500
+    end
+    
     for key, data in pairs(directions) do 
         if love.keyboard.isDown(key) then 
             cX = cX + camSpeed * data[1] * dt
@@ -123,6 +139,8 @@ function love.update(dt)
 end
 
 function love.draw()
+    love.graphics.draw(bgImage, bgQuad, -100000 + cameraX, -100000 + cameraY)
+    
     for _, image in ipairs(pixels) do
         for _, pixel in ipairs(image) do
             pixel:Draw(cameraX, cameraY)
@@ -138,13 +156,13 @@ function love.draw()
         love.graphics.rectangle("fill", currentPlatform.X, currentPlatform.Y, currentPlatform.W, currentPlatform.H)
     end
 
-    uimgr:Draw()
-    
     if toolbar.tool == "delete" or toolbar.tool == "grab" or toolbar.tool == "explosion" or toolbar.tool == "deleteimage" or toolbar.tool == "deleteplatform" then
         local mX, mY = love.mouse.getPosition()
         love.graphics.setColor(1,1,1,1)
         love.graphics.circle("line", mX, mY, brushSize)
     end
+
+    uimgr:Draw()
 end
 local imagesToScale = {}
 function love.mousemoved(x, y, dx, dy)
