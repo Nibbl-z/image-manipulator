@@ -21,7 +21,6 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     selectedTheme:SetHoverColor(0.4,0.4,0.4,1)
     selectedTheme:SetSelectedColor(0.25,0.25,0.25,1)
     
-
     tools = screen:New(nil) 
     tools.Enabled = true
     
@@ -31,7 +30,8 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     buttonList:SetPadding(0,5,0,5)
     buttonList.ZIndex = -1]]
 
-    toolbuttons = {}
+    self.toolbuttons = {}
+    self.inputfields = {}
     
     local playImg = love.graphics.newImage("/img/play.png")
     local pauseImg = love.graphics.newImage("/img/pause.png")
@@ -70,7 +70,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
         self:UpdateButtons()
     end
     
-    table.insert(toolbuttons, moveTool)
+    table.insert(self.toolbuttons, moveTool)
     
     deleteTool = imagebutton:New(nil, tools, "/img/delete.png")
     deleteTool:SetSize(0,50,0,50)
@@ -88,7 +88,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
         self:UpdateButtons()
     end
 
-    table.insert(toolbuttons, deleteTool)
+    table.insert(self.toolbuttons, deleteTool)
 
     deleteImgTool = imagebutton:New(nil, tools, "/img/delete_image.png")
     deleteImgTool:SetSize(0,50,0,50)
@@ -106,7 +106,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
         self:UpdateButtons()
     end
 
-    table.insert(toolbuttons, deleteImgTool)
+    table.insert(self.toolbuttons, deleteImgTool)
 
     scaleTool = imagebutton:New(nil, tools, "/img/scale.png")
     scaleTool:SetSize(0,50,0,50)
@@ -125,7 +125,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
         self:UpdateButtons()
     end
     
-    table.insert(toolbuttons, scaleTool)
+    table.insert(self.toolbuttons, scaleTool)
 
     grabTool = imagebutton:New(nil, tools, "/img/grab.png")
     grabTool:SetSize(0,50,0,50)
@@ -143,7 +143,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
         self:UpdateButtons()
     end
     
-    table.insert(toolbuttons, grabTool)
+    table.insert(self.toolbuttons, grabTool)
     
     explosionTool = imagebutton:New(nil, tools, "/img/explosion.png")
     explosionTool:SetSize(0,50,0,50)
@@ -161,7 +161,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
         self:UpdateButtons()
     end
     
-    table.insert(toolbuttons, explosionTool)
+    table.insert(self.toolbuttons, explosionTool)
 
     buildTool = imagebutton:New(nil, tools, "/img/build_platform.png")
     buildTool:SetSize(0,50,0,50)
@@ -179,7 +179,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
         self:UpdateButtons()
     end
     
-    table.insert(toolbuttons, buildTool)
+    table.insert(self.toolbuttons, buildTool)
     
     deletePlatformTool = imagebutton:New(nil, tools, "/img/delete_platform.png")
     deletePlatformTool:SetSize(0,50,0,50)
@@ -197,7 +197,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
         self:UpdateButtons()
     end
     
-    table.insert(toolbuttons, deletePlatformTool)
+    table.insert(self.toolbuttons, deletePlatformTool)
 
     resetTool = imagebutton:New(nil, tools, "/img/reset.png")
     resetTool:SetSize(0,50,0,50)
@@ -228,6 +228,8 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
         end
     end
 
+    table.insert(self.inputfields, gravityInput)
+
     gravityTitle = label:New(nil, tools, "Set Gravity", 16, "right", "center")
     gravityTitle:SetAnchorPoint(1,0)
     gravityTitle:SetPosition(1,-110,0,5)
@@ -251,6 +253,8 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
             explosionForceInput.Text = "Invalid Input"
         end
     end
+
+    table.insert(self.inputfields, explosionForceInput)
     
     explosionForceTitle = label:New(nil, tools, "Set Explosion Force", 16, "right", "center")
     explosionForceTitle:SetAnchorPoint(1,0)
@@ -275,7 +279,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
             sizeXInput.Text = "Invalid Input"
         end
     end
-    
+    table.insert(self.inputfields, sizeXInput)
     sizeXTitle = label:New(nil, tools, "Default X Scale", 16, "right", "center")
     sizeXTitle:SetAnchorPoint(1,0)
     sizeXTitle:SetPosition(1,-110,0,115)
@@ -305,10 +309,12 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     sizeYTitle:SetPosition(1,-110,0,170)
     sizeYTitle:SetSize(0,100,0,50)
     sizeYTitle:SetTextColor(1,1,1,1)
+    
+    table.insert(self.inputfields, sizeYTitle)
 end
 
 function toolbar:UpdateButtons()
-    for _, v in ipairs(toolbuttons) do
+    for _, v in ipairs(self.toolbuttons) do
         v:ApplyTheme(defaultTheme)
     end
     

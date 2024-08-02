@@ -172,6 +172,20 @@ function love.draw()
 end
 local imagesToScale = {}
 function love.mousemoved(x, y, dx, dy)
+    for _, button in ipairs(toolbar.toolbuttons) do
+        local pX, pY, sX, sY = button:GetDrawingCoordinates()
+        if utils:CheckCollision(pX, pY, sX, sY, x, y, 2, 2) then
+            return
+        end
+    end
+
+    for _, button in ipairs(toolbar.inputfields) do
+        local pX, pY, sX, sY = button:GetDrawingCoordinates()
+        if utils:CheckCollision(pX, pY, sX, sY, x, y, 2, 2) then
+            return
+        end
+    end
+
     if love.mouse.isDown(1) then
         if toolbar.tool == "move" then
             local imagesToDrag = {}
@@ -275,6 +289,20 @@ function love.mousemoved(x, y, dx, dy)
 end
 
 function love.mousepressed(x,y,button)
+    for _, button in ipairs(toolbar.toolbuttons) do
+        local pX, pY, sX, sY = button:GetDrawingCoordinates()
+        if utils:CheckCollision(pX, pY, sX, sY, x, y, 2, 2) then
+            return
+        end
+    end
+
+    for _, button in ipairs(toolbar.inputfields) do
+        local pX, pY, sX, sY = button:GetDrawingCoordinates()
+        if utils:CheckCollision(pX, pY, sX, sY, x, y, 2, 2) then
+            return
+        end
+    end
+
     if button ~= 1 then return end
     
     if toolbar.tool == "explosion" then
@@ -353,7 +381,7 @@ function love.mousepressed(x,y,button)
             pixelDeleteSfx:play()
         end
     end
-
+    
     if toolbar.tool == "deleteimage" then
         local toDelete = {}
         
