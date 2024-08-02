@@ -15,7 +15,12 @@ local toClear = {}
 
 local brushSize = 50
 
+local currentPlatform = nil
 local platforms = {}
+
+local cX, cY = 0, 0
+local cameraX, cameraY = 0, 0
+local camSpeed = 300
 
 function Reset()
     for ii, image in ipairs(pixels) do
@@ -50,17 +55,10 @@ function love.load()
     love.window.setTitle("Image Playground")
 
     world = love.physics.newWorld(0,300,true)
-    
-    --[[wall = physicsInstace:New(nil, world, "static", "rectangle", {X = 2000, Y = 50}, 0, 0, {X = 0, Y = 500})
-    wall.body:setX(0)
-    wall.body:setY(500)
-    wall:SetColor(1,1,1,1)
-    wall.Shape = "rectangle"
-    wall.Size = {X = 2000, Y = 50}]]
 
     toolbar:Init(Reset, SetGravity, SetExplosionForce, SetXScale, SetYScale)
 end
-
+local directions = {a = {1,0}, d = {-1,0}, w = {0,1}, s = {0,-1}}
 function love.update(dt)
     if toolbar.running then 
         world:update(dt) 
@@ -110,16 +108,38 @@ function love.update(dt)
             end
         end
     end
+
+    for key, data in pairs(directions) do 
+        if love.keyboard.isDown(key) then 
+            cX = cX + camSpeed * data[1] * dt
+            cY = cY + camSpeed * data[2] * dt
+        end
+    end
+
+    cameraX = cameraX + cX
+    cameraY = cameraY + cY
+
+    print(cameraX, cameraY)
+    
+    cX, cY = 0,0
 end
 
 function love.draw()
     for _, image in ipairs(pixels) do
         for _, pixel in ipairs(image) do
-            pixel:Draw()
+            pixel:Draw(cameraX, cameraY)
         end
     end
     
-    --wall:Draw()
+    for _, platform in ipairs(platforms) do
+        platform:Draw(cameraX, cameraY)
+    end
+
+    if currentPlatform ~= nil then
+        love.graphics.setColor(1,1,1,0.5)
+        love.graphics.rectangle("fill", currentPlatform.X, currentPlatform.Y, currentPlatform.W, currentPlatform.H)
+    end
+
     uimgr:Draw()
     
     if toolbar.tool == "delete" or toolbar.tool == "grab" or toolbar.tool == "explosion" then
@@ -136,7 +156,7 @@ function love.mousemoved(x, y, dx, dy)
 
             for _, image in ipairs(pixels) do
                 for _, pixel in ipairs(image) do
-                    if utils:CheckCollision(x, y, 4, 4, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                    if utils:CheckCollision(x - cameraX, y - cameraY, 4, 4, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
                         table.insert(imagesToDrag, image)
                         break
                     end
@@ -153,7 +173,7 @@ function love.mousemoved(x, y, dx, dy)
         if toolbar.tool == "delete" then
             for _, image in ipairs(pixels) do
                 for i, pixel in ipairs(image) do
-                    if utils:CheckCollision(x, y, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                    if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
                         table.remove(image, i)
                         pixel.body:destroy()
                         pixel.body:release()
@@ -169,7 +189,7 @@ function love.mousemoved(x, y, dx, dy)
             if #imagesToScale == 0 then
                 for _, image in ipairs(pixels) do
                     for _, pixel in ipairs(image) do
-                        if utils:CheckCollision(x, y, 4, 4, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                        if utils:CheckCollision(x - cameraX, y - cameraY, 4, 4, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
                             
                             table.insert(imagesToScale, image)
                             break
@@ -193,6 +213,13 @@ function love.mousemoved(x, y, dx, dy)
                 end
             end
         end
+
+        if toolbar.tool == "build" then
+            if currentPlatform ~= nil then
+                currentPlatform.W = currentPlatform.W + dx
+                currentPlatform.H = currentPlatform.H + dy
+            end
+        end
     end
 end
 
@@ -202,7 +229,7 @@ function love.mousepressed(x,y,button)
     if toolbar.tool == "explosion" then
         for _, image in ipairs(pixels) do
             for _, pixel in ipairs(image) do
-                if utils:CheckCollision(x, y, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), pixel.Size.X, pixel.Size.Y) then
+                if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), pixel.Size.X, pixel.Size.Y) then
                     local forceX, forceY = 0,0 
                     
                     if pixel.body:getX() < x then
@@ -226,6 +253,12 @@ function love.mousepressed(x,y,button)
             end
         end
     end
+    
+    if toolbar.tool == "build" then
+        if currentPlatform == nil then
+            currentPlatform = {X = x, Y = y, W = 1, H = 1}
+        end
+    end
 end
 
 function love.mousereleased()
@@ -240,6 +273,32 @@ function love.mousereleased()
                     pixel.fixture:setUserData(pixel.Name)
                 end
             end
+        end
+    end
+
+    if toolbar.tool == "build" then
+        if currentPlatform ~= nil then
+            if currentPlatform.W <= 0 then
+                currentPlatform.X = currentPlatform.X + currentPlatform.W
+                currentPlatform.W = math.abs(currentPlatform.W)
+            end
+
+            if currentPlatform.H <= 0 then
+                currentPlatform.Y = currentPlatform.Y + currentPlatform.H
+                currentPlatform.H = math.abs(currentPlatform.H)
+            end
+            
+            newPlatform = physicsInstace:New(nil, world, "static", "rectangle", 
+            {X = currentPlatform.W, Y = currentPlatform.H}, 0, 0, {X = currentPlatform.X + currentPlatform.W / 2 - cameraX, Y = currentPlatform.Y  + currentPlatform.H / 2 - cameraY})
+            newPlatform.body:setX(currentPlatform.X + currentPlatform.W / 2 - cameraX)
+            newPlatform.body:setY(currentPlatform.Y + currentPlatform.H / 2 - cameraY)
+            newPlatform:SetColor(1,1,1,1)
+            newPlatform.Shape = "rectangle"
+            newPlatform.Size = {X = currentPlatform.W, Y = currentPlatform.H}
+            
+            table.insert(platforms, newPlatform)
+
+            currentPlatform = nil
         end
     end
 
@@ -294,12 +353,12 @@ function love.filedropped(file)
             if a ~= 0 then
                 pixels[imageIndex][i] = physicsInstace:New(nil, world, "dynamic", "rectangle", {X = sizeX, Y = sizeY}, 0, 0, 
                 {
-                    X = x * sizeX * spacing + mX - imageWidth / 2, 
-                    Y = y * sizeY * spacing + mY - imageHeight / 2
+                    X = x * sizeX * spacing + mX - imageWidth / 2 - cameraX, 
+                    Y = y * sizeY * spacing + mY - imageHeight / 2 - cameraY
                 })
                 pixels[imageIndex][i].PixelPosition = {
-                    X = x ,
-                    Y = y,
+                    X = x - cameraX,
+                    Y = y - cameraY,
                 }
                 pixels[imageIndex][i].ImageSize = {X = image:getWidth(), Y = image:getHeight()}
                 pixels[imageIndex][i]:SetColor(r,g,b,a)

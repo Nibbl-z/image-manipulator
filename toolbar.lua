@@ -138,9 +138,43 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     
     table.insert(toolbuttons, explosionTool)
 
+    buildTool = imagebutton:New(nil, tools, "/img/build_platform.png")
+    buildTool:SetSize(0,50,0,50)
+    buildTool:SetPosition(0,5,0,335)
+    buildTool.ZIndex = 3
+    buildTool:ApplyTheme(defaultTheme)
+    
+    buildTool.MouseDown = function ()
+        if self.tool == "build" then
+            self.tool = ""
+        else
+            self.tool = "build"
+        end
+        self:UpdateButtons()
+    end
+    
+    table.insert(toolbuttons, buildTool)
+    
+    deletePlatformTool = imagebutton:New(nil, tools, "/img/delete_platform.png")
+    deletePlatformTool:SetSize(0,50,0,50)
+    deletePlatformTool:SetPosition(0,5,0,390)
+    deletePlatformTool.ZIndex = 3
+    deletePlatformTool:ApplyTheme(defaultTheme)
+    
+    deletePlatformTool.MouseDown = function ()
+        if self.tool == "deleteplatform" then
+            self.tool = ""
+        else
+            self.tool = "deleteplatform"
+        end
+        self:UpdateButtons()
+    end
+    
+    table.insert(toolbuttons, deletePlatformTool)
+
     resetTool = imagebutton:New(nil, tools, "/img/reset.png")
     resetTool:SetSize(0,50,0,50)
-    resetTool:SetPosition(0,5,0,335)
+    resetTool:SetPosition(0,5,0,445)
     resetTool.ZIndex = 3
     resetTool:ApplyTheme(defaultTheme)
     
@@ -244,6 +278,10 @@ function toolbar:UpdateButtons()
         grabTool:ApplyTheme(selectedTheme)
     elseif self.tool == "explosion" then
         explosionTool:ApplyTheme(selectedTheme)
+    elseif self.tool == "build" then
+        buildTool:ApplyTheme(selectedTheme)
+    elseif self.tool == "deleteplatform" then
+        deletePlatformTool:ApplyTheme(selectedTheme)
     end
 end
 

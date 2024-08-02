@@ -49,7 +49,7 @@ function physicsInstance:New(o, world, bodyType, shape, size, restitution, dampi
         end
     end
     
-    function o:Draw()
+    function o:Draw(camX, camY)
         if o.SceneEnabled == false then return end
         love.graphics.setColor(
             o.Color.R,
@@ -58,8 +58,8 @@ function physicsInstance:New(o, world, bodyType, shape, size, restitution, dampi
             o.Color.A
         )
         
-        
-        
+        love.graphics.push()
+        love.graphics.translate(camX, camY)
         if o.Scaling == true then
             love.graphics.rectangle(
                 "fill",
@@ -71,6 +71,10 @@ function physicsInstance:New(o, world, bodyType, shape, size, restitution, dampi
         else
             love.graphics.polygon("fill", o.body:getWorldPoints(o.shape:getPoints()))
         end
+
+        
+
+        love.graphics.pop()
     end
     
     return o
