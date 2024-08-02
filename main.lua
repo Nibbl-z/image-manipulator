@@ -34,7 +34,7 @@ function Reset()
         platform.body:setActive(false)
         platform.SceneEnabled = false
     end
-
+    
     --world = love.physics.newWorld(0,300,true)
     --pixels = {}
     --imageIndex = 1
@@ -101,19 +101,19 @@ function love.update(dt)
                 if utils:CheckCollision(mX, mY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), pixel.Size.X, pixel.Size.Y) then
                     local forceX, forceY = 0,0 
                     
-                    if pixel.body:getX() < mX then
+                    if pixel.body:getX() < mX - cameraX then
                         forceX = grabSpeed
                     end
                     
-                    if pixel.body:getX() > mX then
+                    if pixel.body:getX() > mX - cameraX then
                         forceX = -grabSpeed
                     end
                     
-                    if pixel.body:getY() < mY then
+                    if pixel.body:getY() < mY - cameraY then
                         forceY = grabSpeed
                     end
                     
-                    if pixel.body:getY() > mY then
+                    if pixel.body:getY() > mY - cameraY then
                         forceY = -grabSpeed
                     end
                     pixel.body:setGravityScale(0)
@@ -194,7 +194,7 @@ function love.mousemoved(x, y, dx, dy)
         
         if toolbar.tool == "delete" then
             local didDelete = false
-
+            
             for _, image in ipairs(pixels) do
                 for i, pixel in ipairs(image) do
                     if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
@@ -236,7 +236,7 @@ function love.mousemoved(x, y, dx, dy)
                 end
             end
         end
-        
+
         if toolbar.tool == "scale" then
             if #imagesToScale == 0 then
                 for _, image in ipairs(pixels) do
@@ -259,12 +259,12 @@ function love.mousemoved(x, y, dx, dy)
                     local imageWidth = pixel.ImageSize.X * spacing * pixel.Size.X
                     local imageHeight = pixel.ImageSize.Y * spacing * pixel.Size.Y 
                     
-                    pixel.body:setX(pixel.PixelPosition.X * pixel.Size.X * spacing + x - imageWidth / 2)
-                    pixel.body:setY(pixel.PixelPosition.Y * pixel.Size.Y * spacing + y - imageHeight / 2)
+                    pixel.body:setX(pixel.PixelPosition.X * pixel.Size.X * spacing + x - imageWidth / 2 - cameraX)
+                    pixel.body:setY(pixel.PixelPosition.Y * pixel.Size.Y * spacing + y - imageHeight / 2 - cameraY)
                 end
             end
         end
-
+        
         if toolbar.tool == "build" then
             if currentPlatform ~= nil then
                 currentPlatform.W = currentPlatform.W + dx
@@ -283,19 +283,19 @@ function love.mousepressed(x,y,button)
                 if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), pixel.Size.X, pixel.Size.Y) then
                     local forceX, forceY = 0,0 
                     
-                    if pixel.body:getX() < x then
+                    if pixel.body:getX() < x - cameraX then
                         forceX = -explosionForce
                     end
                     
-                    if pixel.body:getX() > x then
+                    if pixel.body:getX() > x - cameraX  then
                         forceX = explosionForce
                     end
                     
-                    if pixel.body:getY() < y then
+                    if pixel.body:getY() < y - cameraY then
                         forceY = -explosionForce
                     end
                     
-                    if pixel.body:getY() > y then
+                    if pixel.body:getY() > y - cameraY then
                         forceY = explosionForce
                     end
                     
@@ -474,8 +474,8 @@ function love.filedropped(file)
                     Y = y * sizeY * spacing + mY - imageHeight / 2 - cameraY
                 })
                 pixels[imageIndex][i].PixelPosition = {
-                    X = x - cameraX,
-                    Y = y - cameraY,
+                    X = x,
+                    Y = y,
                 }
                 pixels[imageIndex][i].ImageSize = {X = image:getWidth(), Y = image:getHeight()}
                 pixels[imageIndex][i]:SetColor(r,g,b,a)
