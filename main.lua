@@ -98,7 +98,7 @@ function love.update(dt)
     if toolbar.tool == "grab" and love.mouse.isDown(1) then
         for _, image in ipairs(pixels) do
             for _, pixel in ipairs(image) do
-                if utils:CheckCollision(mX, mY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), pixel.Size.X, pixel.Size.Y) then
+                if utils:Distance(mX, mY, pixel.body:getX(), pixel.body:getY()) <= brushSize then
                     local forceX, forceY = 0,0 
                     
                     if pixel.body:getX() < mX - cameraX then
@@ -117,7 +117,7 @@ function love.update(dt)
                         forceY = -grabSpeed
                     end
                     pixel.body:setGravityScale(0)
-                    pixel.body:applyForce(forceX, forceY)
+                    pixel.body:setLinearVelocity(forceX, forceY)
                 else
                     pixel.body:setGravityScale(1)
                 end
@@ -208,7 +208,7 @@ function love.mousemoved(x, y, dx, dy)
                     end
                 end
             end
-
+            
             if didDelete then
                 pixelDeleteSfx:play()
             end
@@ -414,7 +414,7 @@ function love.mousereleased()
             newPlatform.Size = {X = currentPlatform.W, Y = currentPlatform.H}
             
             table.insert(platforms, newPlatform)
-
+            
             currentPlatform = nil
         end
     end

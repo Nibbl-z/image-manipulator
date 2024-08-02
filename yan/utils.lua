@@ -26,4 +26,10 @@ function utils:CheckCollision(x1, y1, w1, h1, x2, y2, w2, h2)
         y2 < y1+h1
 end
 
+function utils:Distance( x1, y1, x2, y2 )
+    local dx = x1 - x2
+    local dy = y1 - y2
+    return math.sqrt ( dx * dx + dy * dy )
+end
+
 return utils
