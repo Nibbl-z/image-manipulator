@@ -116,7 +116,7 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
     
     scaleTool.MouseDown = function ()
         clickSfx:play()
-        self.running = false
+
         if self.tool == "scale" then
             self.tool = ""
         else

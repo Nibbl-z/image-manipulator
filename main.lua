@@ -124,7 +124,7 @@ function love.update(dt)
     if toolbar.tool == "grab" and love.mouse.isDown(1) then
         for _, image in ipairs(pixels) do
             for _, pixel in ipairs(image) do
-                if utils:Distance(mX, mY, pixel.body:getX(), pixel.body:getY()) <= brushSize then
+                if utils:Distance(mX, mY, pixel.body:getX() - cameraX, pixel.body:getY() - cameraY) <= brushSize then
                     local forceX, forceY = 0,0 
                     
                     if pixel.body:getX() < mX - cameraX then
@@ -147,6 +147,12 @@ function love.update(dt)
                 else
                     pixel.body:setGravityScale(1)
                 end
+            end
+        end
+    else
+        for _, image in ipairs(pixels) do
+            for _, pixel in ipairs(image) do
+                pixel.body:setGravityScale(1)
             end
         end
     end
@@ -295,8 +301,10 @@ function love.mousemoved(x, y, dx, dy)
             for _, image in ipairs(pixels) do
                 for i, pixel in ipairs(image) do
                     if utils:Distance(x - cameraX, y - cameraY, pixel.body:getX(), pixel.body:getY()) <= brushSize then
-                        table.insert(toDelete, image)
-                        break
+                        if pixel.body:isActive() then
+                            table.insert(toDelete, image)
+                            break
+                        end
                     end
                 end
             end
@@ -304,11 +312,12 @@ function love.mousemoved(x, y, dx, dy)
                 deleteSfx:clone():play()
             end
             for _, image in ipairs(toDelete) do
-                
                 for i, pixel in ipairs(image) do
-                    pixel.body:setActive(false)
-                    pixel.SceneEnabled = false
-                    pixelCount = pixelCount - 1
+                    if pixel.body:isActive() then
+                        pixel.body:setActive(false)
+                        pixel.SceneEnabled = false
+                        pixelCount = pixelCount - 1
+                    end
                 end
             end
         end
@@ -451,8 +460,10 @@ function love.mousepressed(x,y,button)
         for _, image in ipairs(pixels) do
             for i, pixel in ipairs(image) do
                 if utils:Distance(x - cameraX, y - cameraY, pixel.body:getX(), pixel.body:getY()) <= brushSize then
-                    table.insert(toDelete, image)
-                    break
+                    if pixel.body:isActive() then
+                        table.insert(toDelete, image)
+                        break
+                    end
                 end
             end
         end
@@ -461,9 +472,11 @@ function love.mousepressed(x,y,button)
         end
         for _, image in ipairs(toDelete) do
             for i, pixel in ipairs(image) do
-                pixel.body:setActive(false)
-                pixel.SceneEnabled = false
-                pixelCount = pixelCount - 1
+                if pixel.body:isActive() then
+                    pixel.body:setActive(false)
+                    pixel.SceneEnabled = false
+                    pixelCount = pixelCount - 1
+                end
             end
         end
     end
