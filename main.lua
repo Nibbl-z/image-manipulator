@@ -197,7 +197,7 @@ function love.update(dt)
     end
     
     cX, cY = 0,0
-
+    
     toolbar.FPSLabel.Text = "FPS: "..love.timer.getFPS()
     toolbar.PixelCountLabel.Text = "Pixels: "..pixelCount
 end
@@ -220,7 +220,7 @@ function love.draw()
         love.graphics.rectangle("fill", currentPlatform.X, currentPlatform.Y, currentPlatform.W, currentPlatform.H)
     end
 
-    if toolbar.tool == "delete" or toolbar.tool == "grab" or toolbar.tool == "explosion" or toolbar.tool == "deleteimage" or toolbar.tool == "deleteplatform" then
+    if toolbar.tool == "delete" or toolbar.tool == "grab" or toolbar.tool == "explosion" or toolbar.tool == "deleteimage" then
         local mX, mY = love.mouse.getPosition()
         love.graphics.setColor(1,1,1,1)
         love.graphics.circle("line", mX, mY, brushSize)
@@ -370,7 +370,7 @@ function love.mousepressed(x,y,button)
     if toolbar.tool == "explosion" then
         for _, image in ipairs(pixels) do
             for _, pixel in ipairs(image) do
-                if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), pixel.Size.X, pixel.Size.Y) then
+                if utils:Distance(x - cameraX, y - cameraY, pixel.body:getX(), pixel.body:getY()) <= brushSize then
                     local forceX, forceY = 0,0 
                     
                     if pixel.body:getX() < x - cameraX then
@@ -405,9 +405,9 @@ function love.mousepressed(x,y,button)
     
     if toolbar.tool == "deleteplatform" then
         local didDelete = false
-
+        
         for i, platform in ipairs(platforms) do
-            if utils:CheckCollision(x - cameraX - brushSize / 2, y - cameraY - brushSize / 2, brushSize, brushSize, platform.body:getX(), platform.body:getY(), platform.Size.X, platform.Size.Y) then
+            if utils:CheckCollision(x - cameraX, y - cameraY, 1, 1, platform.body:getX() - platform.Size.X / 2, platform.body:getY() - platform.Size.Y / 2, platform.Size.X, platform.Size.Y) then
                 didDelete = true
                 table.remove(platforms, i)
                 platform.body:destroy()
@@ -417,7 +417,7 @@ function love.mousepressed(x,y,button)
                 break
             end
         end
-
+        
         if didDelete then
             deleteSfx:clone():play()
         end
@@ -517,7 +517,7 @@ function love.mousereleased()
 end
 
 function love.wheelmoved(x, y)
-    if toolbar.tool == "delete" or toolbar.tool == "grab" or toolbar.tool == "explosion" or toolbar.tool == "deleteimage" or toolbar.tool == "deleteplatform"  then
+    if toolbar.tool == "delete" or toolbar.tool == "grab" or toolbar.tool == "explosion" or toolbar.tool == "deleteimage" then
         brushSize = utils:Clamp(brushSize + y, 5, 10000)
     end
 end
