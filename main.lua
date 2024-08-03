@@ -21,7 +21,8 @@ local platforms = {}
 local cX, cY = 0, 0
 local cameraX, cameraY = 0, 0
 local camSpeed = 500
-
+local defaultRestitution = 0
+local pixelCount = 0
 function Reset()
     for ii, image in ipairs(pixels) do
         for i, pixel in ipairs(image) do
@@ -34,14 +35,22 @@ function Reset()
         platform.body:setActive(false)
         platform.SceneEnabled = false
     end
+
+    pixelCount = 0
     
     --world = love.physics.newWorld(0,300,true)
     --pixels = {}
     --imageIndex = 1
 end
 
-function SetGravity(gravity)
-    world:setGravity(0,gravity)
+function SetXGravity(gravity)
+    local _, y = world:getGravity()
+    world:setGravity(gravity, y)
+end
+
+function SetYGravity(gravity)
+    local x, _ = world:getGravity()
+    world:setGravity(x,gravity)
 end
 
 function SetExplosionForce(force)
@@ -56,13 +65,27 @@ function SetYScale(scale)
     sizeY = scale
 end
 
+function SetBounciness(restitution)
+    for ii, image in ipairs(pixels) do
+        for i, pixel in ipairs(image) do
+            pixel.fixture:setRestitution(restitution)
+        end
+    end
+
+    for i, platform in ipairs(platforms) do
+        platform.fixture:setRestitution(restitution)
+    end
+
+    defaultRestitution = restitution
+end
+
 function love.load()
     love.window.setMode(800, 600, {resizable = true})
     love.window.setTitle("Image Playground")
 
     world = love.physics.newWorld(0,300,true)
 
-    toolbar:Init(Reset, SetGravity, SetExplosionForce, SetXScale, SetYScale)
+    toolbar:Init(Reset, SetXGravity, SetYGravity, SetExplosionForce, SetXScale, SetYScale, SetBounciness)
 
     bgImage = love.graphics.newImage("/img/bg.png")
     bgImage:setWrap("repeat", "repeat")
@@ -142,6 +165,9 @@ function love.update(dt)
     cameraY = cameraY + cY
     
     cX, cY = 0,0
+
+    toolbar.FPSLabel.Text = "FPS: "..love.timer.getFPS()
+    toolbar.PixelCountLabel.Text = "Pixels: "..pixelCount
 end
 
 function love.draw()
@@ -218,6 +244,7 @@ function love.mousemoved(x, y, dx, dy)
                         pixel.body = nil
                         pixel = nil
                         didDelete = true
+                        pixelCount = pixelCount - 1
                         break
                     end
                 end
@@ -247,6 +274,7 @@ function love.mousemoved(x, y, dx, dy)
                 for i, pixel in ipairs(image) do
                     pixel.body:setActive(false)
                     pixel.SceneEnabled = false
+                    pixelCount = pixelCount - 1
                 end
             end
         end
@@ -372,6 +400,7 @@ function love.mousepressed(x,y,button)
                     pixel.body = nil
                     pixel = nil
                     didDelete = true
+                    pixelCount = pixelCount - 1
                     break
                 end
             end
@@ -400,6 +429,7 @@ function love.mousepressed(x,y,button)
             for i, pixel in ipairs(image) do
                 pixel.body:setActive(false)
                 pixel.SceneEnabled = false
+                pixelCount = pixelCount - 1
             end
         end
     end
@@ -434,7 +464,7 @@ function love.mousereleased()
             end
             
             newPlatform = physicsInstace:New(nil, world, "static", "rectangle", 
-            {X = currentPlatform.W, Y = currentPlatform.H}, 0, 0, {X = currentPlatform.X + currentPlatform.W / 2 - cameraX, Y = currentPlatform.Y  + currentPlatform.H / 2 - cameraY})
+            {X = currentPlatform.W, Y = currentPlatform.H}, defaultRestitution, 0, {X = currentPlatform.X + currentPlatform.W / 2 - cameraX, Y = currentPlatform.Y  + currentPlatform.H / 2 - cameraY})
             newPlatform.body:setX(currentPlatform.X + currentPlatform.W / 2 - cameraX)
             newPlatform.body:setY(currentPlatform.Y + currentPlatform.H / 2 - cameraY)
             newPlatform:SetColor(1,1,1,1)
@@ -496,7 +526,8 @@ function love.filedropped(file)
         for y = 0, image:getHeight() - 1 do
             local r, g, b, a = image:getPixel(x,y)
             if a ~= 0 then
-                pixels[imageIndex][i] = physicsInstace:New(nil, world, "dynamic", "rectangle", {X = sizeX, Y = sizeY}, 0, 0, 
+                pixelCount = pixelCount + 1
+                pixels[imageIndex][i] = physicsInstace:New(nil, world, "dynamic", "rectangle", {X = sizeX, Y = sizeY}, defaultRestitution, 0, 
                 {
                     X = x * sizeX * spacing + mX - imageWidth / 2 - cameraX, 
                     Y = y * sizeY * spacing + mY - imageHeight / 2 - cameraY

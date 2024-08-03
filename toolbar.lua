@@ -10,7 +10,7 @@ local thememgr = require("yan.thememanager")
 toolbar.tool = ""
 toolbar.running = false
 
-function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, setYScale)
+function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionForce, setXScale, setYScale, setRestitutionFunc)
     clickSfx = love.audio.newSource("/audio/select.wav", "static")
     
     defaultTheme = thememgr:NewTheme()
@@ -198,7 +198,7 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     end
     
     table.insert(self.toolbuttons, deletePlatformTool)
-
+    
     resetTool = imagebutton:New(nil, tools, "/img/reset.png")
     resetTool:SetSize(0,50,0,50)
     resetTool:SetPosition(0,5,0,500)
@@ -209,40 +209,72 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
         clickSfx:play()
         resetFunc()
     end
+
+    table.insert(self.toolbuttons, resetTool)
     
-    gravityInput = textinput:New(nil, tools, "300", 16, "left", "center")
-    gravityInput:SetAnchorPoint(1,0)
-    gravityInput:SetPosition(1,-5,0,5)
-    gravityInput:SetSize(0,100,0,50)
-    gravityInput:ApplyTheme(defaultTheme)
+    gravityXInput = textinput:New(nil, tools, "0", 16, "left", "center")
+    gravityXInput:SetAnchorPoint(1,0)
+    gravityXInput:SetPosition(1,-5,0,5)
+    gravityXInput:SetSize(0,100,0,50)
+    gravityXInput:ApplyTheme(defaultTheme)
     
-    gravityInput.MouseDown = function ()
+    gravityXInput.MouseDown = function ()
+        gravityXInput.Text = ""
         clickSfx:play()
     end
-
-    gravityInput.OnEnter = function ()
-        if tonumber(gravityInput.Text) ~= nil then
-            setGravityFunc(tonumber(gravityInput.Text))
+    
+    gravityXInput.OnEnter = function ()
+        if tonumber(gravityXInput.Text) ~= nil then
+            setXGravityFunc(tonumber(gravityXInput.Text))
         else
-            gravityInput.Text = "Invalid Input"
+            gravityXInput.Text = "Invalid Input"
         end
     end
 
-    table.insert(self.inputfields, gravityInput)
+    table.insert(self.inputfields, gravityXInput)
+    
+    gravityXTitle = label:New(nil, tools, "Set X Gravity", 16, "right", "center")
+    gravityXTitle:SetAnchorPoint(1,0)
+    gravityXTitle:SetPosition(1,-110,0,5)
+    gravityXTitle:SetSize(0,100,0,50)
+    gravityXTitle:SetTextColor(1,1,1,1)
 
-    gravityTitle = label:New(nil, tools, "Set Gravity", 16, "right", "center")
-    gravityTitle:SetAnchorPoint(1,0)
-    gravityTitle:SetPosition(1,-110,0,5)
-    gravityTitle:SetSize(0,100,0,50)
-    gravityTitle:SetTextColor(1,1,1,1)
+    gravityYInput = textinput:New(nil, tools, "300", 16, "left", "center")
+    gravityYInput:SetAnchorPoint(1,0)
+    gravityYInput:SetPosition(1,-5,0,60)
+    gravityYInput:SetSize(0,100,0,50)
+    gravityYInput:ApplyTheme(defaultTheme)
+    
+    gravityYInput.MouseDown = function ()
+        gravityYInput.Text = ""
+        clickSfx:play()
+    end
+    
+    gravityYInput.OnEnter = function ()
+        if tonumber(gravityYInput.Text) ~= nil then
+            setYGravityFunc(tonumber(gravityYInput.Text))
+        else
+            gravityYInput.Text = "Invalid Input"
+        end
+    end
+
+    table.insert(self.inputfields, gravityYInput)
+    
+    gravityYTitle = label:New(nil, tools, "Set Y Gravity", 16, "right", "center")
+    gravityYTitle:SetAnchorPoint(1,0)
+    gravityYTitle:SetPosition(1,-110,0,60)
+    gravityYTitle:SetSize(0,100,0,50)
+    gravityYTitle:SetTextColor(1,1,1,1)
+    
 
     explosionForceInput = textinput:New(nil, tools, "250000", 16, "left", "center")
     explosionForceInput:SetAnchorPoint(1,0)
-    explosionForceInput:SetPosition(1,-5,0,60)
+    explosionForceInput:SetPosition(1,-5,0,115)
     explosionForceInput:SetSize(0,100,0,50)
     explosionForceInput:ApplyTheme(defaultTheme)
     
     explosionForceInput.MouseDown = function ()
+        explosionForceInput.Text = ""
         clickSfx:play()
     end
 
@@ -258,21 +290,27 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     
     explosionForceTitle = label:New(nil, tools, "Set Explosion Force", 16, "right", "center")
     explosionForceTitle:SetAnchorPoint(1,0)
-    explosionForceTitle:SetPosition(1,-110,0,60)
+    explosionForceTitle:SetPosition(1,-110,0,115)
     explosionForceTitle:SetSize(0,100,0,50)
     explosionForceTitle:SetTextColor(1,1,1,1)
     
     sizeXInput = textinput:New(nil, tools, "10", 16, "left", "center")
     sizeXInput:SetAnchorPoint(1,0)
-    sizeXInput:SetPosition(1,-5,0,115)
+    sizeXInput:SetPosition(1,-5,0,170)
     sizeXInput:SetSize(0,100,0,50)
     sizeXInput:ApplyTheme(defaultTheme)
     
     sizeXInput.MouseDown = function ()
+        sizeXInput.Text = ""
         clickSfx:play()
     end
 
     sizeXInput.OnEnter = function ()
+        if tonumber(sizeXInput.Text) <= 0 then
+            sizeXInput.Text = "Must be above 0"
+            return
+        end
+
         if tonumber(sizeXInput.Text) ~= nil then
             setXScale(tonumber(sizeXInput.Text))
         else
@@ -282,35 +320,90 @@ function toolbar:Init(resetFunc, setGravityFunc, setExplosionForce, setXScale, s
     table.insert(self.inputfields, sizeXInput)
     sizeXTitle = label:New(nil, tools, "Default X Scale", 16, "right", "center")
     sizeXTitle:SetAnchorPoint(1,0)
-    sizeXTitle:SetPosition(1,-110,0,115)
+    sizeXTitle:SetPosition(1,-110,0,170)
     sizeXTitle:SetSize(0,100,0,50)
     sizeXTitle:SetTextColor(1,1,1,1)
     
     sizeYInput = textinput:New(nil, tools, "10", 16, "left", "center")
     sizeYInput:SetAnchorPoint(1,0)
-    sizeYInput:SetPosition(1,-5,0,170)
+    sizeYInput:SetPosition(1,-5,0,225)
     sizeYInput:SetSize(0,100,0,50)
     sizeYInput:ApplyTheme(defaultTheme)
     
     sizeYInput.OnEnter = function ()
+        if tonumber(sizeYInput.Text) <= 0 then
+            sizeYInput.Text = "Must be above 0"
+            return
+        end
+        
         if tonumber(sizeYInput.Text) ~= nil then
             setYScale(tonumber(sizeYInput.Text))
         else
             sizeYInput.Text = "Invalid Input"
         end
     end
-
+    
     sizeYInput.MouseDown = function ()
+        sizeYInput.Text = ""
         clickSfx:play()
     end
     
     sizeYTitle = label:New(nil, tools, "Default Y Scale", 16, "right", "center")
     sizeYTitle:SetAnchorPoint(1,0)
-    sizeYTitle:SetPosition(1,-110,0,170)
+    sizeYTitle:SetPosition(1,-110,0,225)
     sizeYTitle:SetSize(0,100,0,50)
     sizeYTitle:SetTextColor(1,1,1,1)
     
-    table.insert(self.inputfields, sizeYTitle)
+    table.insert(self.inputfields, sizeYInput)
+
+    bouncinessInput = textinput:New(nil, tools, "0.0", 16, "left", "center")
+    bouncinessInput:SetAnchorPoint(1,0)
+    bouncinessInput:SetPosition(1,-5,0,280)
+    bouncinessInput:SetSize(0,100,0,50)
+    bouncinessInput:ApplyTheme(defaultTheme)
+    
+    bouncinessInput.OnEnter = function ()
+        if tonumber(bouncinessInput.Text) <= 0 then
+            bouncinessInput.Text = "Must be above 0"
+            return
+        end
+
+        if tonumber(bouncinessInput.Text) > 1 then
+            bouncinessInput.Text = "Must be below 1"
+            return
+        end
+        
+        if tonumber(bouncinessInput.Text) ~= nil then
+            setRestitutionFunc(tonumber(bouncinessInput.Text))
+        else
+            bouncinessInput.Text = "Invalid Input"
+        end
+    end
+    
+    bouncinessInput.MouseDown = function ()
+        bouncinessInput.Text = ""
+        clickSfx:play()
+    end
+    
+    bouncinessTitle = label:New(nil, tools, "Bounciness", 16, "right", "center")
+    bouncinessTitle:SetAnchorPoint(1,0)
+    bouncinessTitle:SetPosition(1,-110,0,280)
+    bouncinessTitle:SetSize(0,100,0,50)
+    bouncinessTitle:SetTextColor(1,1,1,1)
+    
+    table.insert(self.inputfields, bouncinessInput)
+
+    self.FPSLabel = label:New(nil, tools, "FPS: 0", 16, "right", "center")
+    self.FPSLabel:SetAnchorPoint(1,1)
+    self.FPSLabel:SetPosition(1,-10,1,-10)
+    self.FPSLabel:SetSize(0,300,0,25)
+    self.FPSLabel:SetTextColor(1,1,1,1)
+
+    self.PixelCountLabel = label:New(nil, tools, "Pixels: 0", 16, "right", "center")
+    self.PixelCountLabel:SetAnchorPoint(1,1)
+    self.PixelCountLabel:SetPosition(1,-10,1,-40)
+    self.PixelCountLabel:SetSize(0,300,0,25)
+    self.PixelCountLabel:SetTextColor(1,1,1,1)
 end
 
 function toolbar:UpdateButtons()
