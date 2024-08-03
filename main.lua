@@ -147,6 +147,28 @@ function love.update(dt)
             end
         end
     end
+
+    if toolbar.tool == "delete" and love.mouse.isDown(1)  then
+        local didDelete = false
+        for _, image in ipairs(pixels) do
+            for i, pixel in ipairs(image) do
+                if utils:Distance(mX - cameraX, mY - cameraY, pixel.body:getX(), pixel.body:getY()) <= brushSize then
+                    table.remove(image, i)
+                    pixel.body:destroy()
+                    pixel.body:release()
+                    pixel.body = nil
+                    pixel = nil
+                    didDelete = true
+                    pixelCount = pixelCount - 1
+                    --break
+                end
+            end
+        end
+
+        if didDelete then
+            pixelDeleteSfx:play()
+        end
+    end
     
     if love.keyboard.isDown("lshift") then
         camSpeed = 1000
@@ -237,7 +259,7 @@ function love.mousemoved(x, y, dx, dy)
             
             for _, image in ipairs(pixels) do
                 for i, pixel in ipairs(image) do
-                    if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                    if utils:Distance(x - cameraX, y - cameraY, pixel.body:getX(), pixel.body:getY()) <= brushSize then
                         table.remove(image, i)
                         pixel.body:destroy()
                         pixel.body:release()
@@ -245,7 +267,7 @@ function love.mousemoved(x, y, dx, dy)
                         pixel = nil
                         didDelete = true
                         pixelCount = pixelCount - 1
-                        break
+                        --break
                     end
                 end
             end
@@ -393,7 +415,7 @@ function love.mousepressed(x,y,button)
         local didDelete = false
         for _, image in ipairs(pixels) do
             for i, pixel in ipairs(image) do
-                if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                if utils:Distance(x - cameraX, y - cameraY, pixel.body:getX(), pixel.body:getY()) <= brushSize then
                     table.remove(image, i)
                     pixel.body:destroy()
                     pixel.body:release()
@@ -401,7 +423,7 @@ function love.mousepressed(x,y,button)
                     pixel = nil
                     didDelete = true
                     pixelCount = pixelCount - 1
-                    break
+                    --break
                 end
             end
         end

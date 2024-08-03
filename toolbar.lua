@@ -306,12 +306,11 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
     end
 
     sizeXInput.OnEnter = function ()
-        if tonumber(sizeXInput.Text) <= 0 then
-            sizeXInput.Text = "Must be above 0"
-            return
-        end
-
         if tonumber(sizeXInput.Text) ~= nil then
+            if tonumber(sizeXInput.Text) <= 0 then
+                sizeXInput.Text = "Must be above 0"
+                return
+            end
             setXScale(tonumber(sizeXInput.Text))
         else
             sizeXInput.Text = "Invalid Input"
@@ -331,12 +330,11 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
     sizeYInput:ApplyTheme(defaultTheme)
     
     sizeYInput.OnEnter = function ()
-        if tonumber(sizeYInput.Text) <= 0 then
-            sizeYInput.Text = "Must be above 0"
-            return
-        end
-        
         if tonumber(sizeYInput.Text) ~= nil then
+            if tonumber(sizeYInput.Text) <= 0 then
+                sizeYInput.Text = "Must be above 0"
+                return
+            end
             setYScale(tonumber(sizeYInput.Text))
         else
             sizeYInput.Text = "Invalid Input"
@@ -362,18 +360,17 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
     bouncinessInput:SetSize(0,100,0,50)
     bouncinessInput:ApplyTheme(defaultTheme)
     
-    bouncinessInput.OnEnter = function ()
-        if tonumber(bouncinessInput.Text) <= 0 then
-            bouncinessInput.Text = "Must be above 0"
-            return
-        end
-
-        if tonumber(bouncinessInput.Text) > 1 then
-            bouncinessInput.Text = "Must be below 1"
-            return
-        end
-        
+    bouncinessInput.OnEnter = function ()  
         if tonumber(bouncinessInput.Text) ~= nil then
+            if tonumber(bouncinessInput.Text) < 0 then
+                bouncinessInput.Text = "Must be 0 or above"
+                return
+            end
+    
+            if tonumber(bouncinessInput.Text) > 1 then
+                bouncinessInput.Text = "Must be below 1"
+                return
+            end
             setRestitutionFunc(tonumber(bouncinessInput.Text))
         else
             bouncinessInput.Text = "Invalid Input"
