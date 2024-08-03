@@ -68,6 +68,10 @@ function SetYScale(scale)
     sizeY = scale
 end
 
+function SetGrabSpeed(speed)
+    grabSpeed = speed
+end
+
 function SetBounciness(restitution)
     for ii, image in ipairs(pixels) do
         for i, pixel in ipairs(image) do
@@ -78,7 +82,7 @@ function SetBounciness(restitution)
     for i, platform in ipairs(platforms) do
         platform.fixture:setRestitution(restitution)
     end
-
+    
     defaultRestitution = restitution
 end
 
@@ -88,7 +92,7 @@ function love.load()
 
     world = love.physics.newWorld(0,300,true)
 
-    toolbar:Init(Reset, SetXGravity, SetYGravity, SetExplosionForce, SetXScale, SetYScale, SetBounciness)
+    toolbar:Init(Reset, SetXGravity, SetYGravity, SetExplosionForce, SetXScale, SetYScale, SetBounciness, SetGrabSpeed)
 
     bgImage = love.graphics.newImage("/img/bg.png")
     bgImage:setWrap("repeat", "repeat")
@@ -156,7 +160,7 @@ function love.update(dt)
             end
         end
     end
-
+    
     if toolbar.tool == "delete" and love.mouse.isDown(1)  then
         local didDelete = false
         for _, image in ipairs(pixels) do

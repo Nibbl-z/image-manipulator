@@ -10,9 +10,9 @@ local thememgr = require("yan.thememanager")
 toolbar.tool = ""
 toolbar.running = false
 
-function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionForce, setXScale, setYScale, setRestitutionFunc)
+function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionForce, setXScale, setYScale, setRestitutionFunc, setGrabSpeed)
     clickSfx = love.audio.newSource("/audio/select.wav", "static")
-    
+    enterSfx = love.audio.newSource("/audio/onEnter.wav", "static")
     defaultTheme = thememgr:NewTheme()
     defaultTheme.CornerRoundness = 4
     
@@ -229,6 +229,8 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
         else
             gravityXInput.Text = "Invalid Input"
         end
+
+        enterSfx:play()
     end
 
     table.insert(self.inputfields, gravityXInput)
@@ -256,6 +258,8 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
         else
             gravityYInput.Text = "Invalid Input"
         end
+
+        enterSfx:play()
     end
 
     table.insert(self.inputfields, gravityYInput)
@@ -266,7 +270,7 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
     gravityYTitle:SetSize(0,100,0,50)
     gravityYTitle:SetTextColor(1,1,1,1)
     
-
+    
     explosionForceInput = textinput:New(nil, tools, "250000", 16, "left", "center")
     explosionForceInput:SetAnchorPoint(1,0)
     explosionForceInput:SetPosition(1,-5,0,115)
@@ -284,6 +288,8 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
         else
             explosionForceInput.Text = "Invalid Input"
         end
+
+        enterSfx:play()
     end
 
     table.insert(self.inputfields, explosionForceInput)
@@ -294,9 +300,38 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
     explosionForceTitle:SetSize(0,100,0,50)
     explosionForceTitle:SetTextColor(1,1,1,1)
     
+    grabSpeedInput = textinput:New(nil, tools, "200", 16, "left", "center")
+    grabSpeedInput:SetAnchorPoint(1,0)
+    grabSpeedInput:SetPosition(1,-5,0,170)
+    grabSpeedInput:SetSize(0,100,0,50)
+    grabSpeedInput:ApplyTheme(defaultTheme)
+    
+    grabSpeedInput.MouseDown = function ()
+        grabSpeedInput.Text = ""
+        clickSfx:play()
+    end
+    
+    grabSpeedInput.OnEnter = function ()
+        if tonumber(grabSpeedInput.Text) ~= nil then
+            setGrabSpeed(tonumber(grabSpeedInput.Text))
+        else
+            grabSpeedInput.Text = "Invalid Input"
+        end
+
+        enterSfx:play()
+    end
+    
+    table.insert(self.inputfields, grabSpeedInput)
+    
+    grabSpeedTitle = label:New(nil, tools, "Set Grab Speed", 16, "right", "center")
+    grabSpeedTitle:SetAnchorPoint(1,0)
+    grabSpeedTitle:SetPosition(1,-110,0,170)
+    grabSpeedTitle:SetSize(0,100,0,50)
+    grabSpeedTitle:SetTextColor(1,1,1,1)
+    
     sizeXInput = textinput:New(nil, tools, "10", 16, "left", "center")
     sizeXInput:SetAnchorPoint(1,0)
-    sizeXInput:SetPosition(1,-5,0,170)
+    sizeXInput:SetPosition(1,-5,0,225)
     sizeXInput:SetSize(0,100,0,50)
     sizeXInput:ApplyTheme(defaultTheme)
     
@@ -315,17 +350,19 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
         else
             sizeXInput.Text = "Invalid Input"
         end
+
+        enterSfx:play()
     end
     table.insert(self.inputfields, sizeXInput)
     sizeXTitle = label:New(nil, tools, "Default X Scale", 16, "right", "center")
     sizeXTitle:SetAnchorPoint(1,0)
-    sizeXTitle:SetPosition(1,-110,0,170)
+    sizeXTitle:SetPosition(1,-110,0,225)
     sizeXTitle:SetSize(0,100,0,50)
     sizeXTitle:SetTextColor(1,1,1,1)
     
     sizeYInput = textinput:New(nil, tools, "10", 16, "left", "center")
     sizeYInput:SetAnchorPoint(1,0)
-    sizeYInput:SetPosition(1,-5,0,225)
+    sizeYInput:SetPosition(1,-5,0,280)
     sizeYInput:SetSize(0,100,0,50)
     sizeYInput:ApplyTheme(defaultTheme)
     
@@ -339,6 +376,8 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
         else
             sizeYInput.Text = "Invalid Input"
         end
+
+        enterSfx:play()
     end
     
     sizeYInput.MouseDown = function ()
@@ -348,7 +387,7 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
     
     sizeYTitle = label:New(nil, tools, "Default Y Scale", 16, "right", "center")
     sizeYTitle:SetAnchorPoint(1,0)
-    sizeYTitle:SetPosition(1,-110,0,225)
+    sizeYTitle:SetPosition(1,-110,0,280)
     sizeYTitle:SetSize(0,100,0,50)
     sizeYTitle:SetTextColor(1,1,1,1)
     
@@ -356,7 +395,7 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
 
     bouncinessInput = textinput:New(nil, tools, "0.0", 16, "left", "center")
     bouncinessInput:SetAnchorPoint(1,0)
-    bouncinessInput:SetPosition(1,-5,0,280)
+    bouncinessInput:SetPosition(1,-5,0,335)
     bouncinessInput:SetSize(0,100,0,50)
     bouncinessInput:ApplyTheme(defaultTheme)
     
@@ -375,6 +414,8 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
         else
             bouncinessInput.Text = "Invalid Input"
         end
+
+        enterSfx:play()
     end
     
     bouncinessInput.MouseDown = function ()
@@ -384,7 +425,7 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
     
     bouncinessTitle = label:New(nil, tools, "Bounciness", 16, "right", "center")
     bouncinessTitle:SetAnchorPoint(1,0)
-    bouncinessTitle:SetPosition(1,-110,0,280)
+    bouncinessTitle:SetPosition(1,-110,0,335)
     bouncinessTitle:SetSize(0,100,0,50)
     bouncinessTitle:SetTextColor(1,1,1,1)
     
