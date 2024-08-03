@@ -102,6 +102,11 @@ function love.load()
     explosionSfx = love.audio.newSource("/audio/explosion.wav", "static")
     deleteSfx = love.audio.newSource("/audio/delete.wav", "static")
     pixelDeleteSfx = love.audio.newSource("/audio/pixelDelete.wav", "static")
+
+    bgMusic = love.audio.newSource("/music/main.mp3", "stream")
+    bgMusic:setVolume(0.3)
+    bgMusic:setLooping(true)
+    bgMusic:play()
 end
 
 local directions = {a = {1,0}, d = {-1,0}, w = {0,1}, s = {0,-1}}
