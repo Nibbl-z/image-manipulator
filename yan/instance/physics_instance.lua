@@ -61,6 +61,10 @@ function physicsInstance:New(o, world, bodyType, shape, size, restitution, dampi
         love.graphics.push()
         love.graphics.translate(camX, camY)
         if o.Scaling == true then
+            if o.OriginalSizeX ~= nil then
+                love.graphics.translate(-o.OriginalSizeX / 2, -o.OriginalSizeY / 2)
+            end
+
             love.graphics.rectangle(
                 "fill",
                 o.body:getX(),
