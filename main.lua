@@ -23,6 +23,9 @@ local cameraX, cameraY = 0, 0
 local camSpeed = 500
 local defaultRestitution = 0
 local pixelCount = 0
+
+local movingImages = {}
+
 function Reset()
     for ii, image in ipairs(pixels) do
         for i, pixel in ipairs(image) do
@@ -185,6 +188,13 @@ function love.update(dt)
 
     cameraX = cameraX + cX
     cameraY = cameraY + cY
+
+    for _, image in ipairs(movingImages) do
+        for _, pixel in ipairs(image) do
+            pixel.body:setX(pixel.body:getX() - cX)
+            pixel.body:setY(pixel.body:getY() - cY)
+        end
+    end
     
     cX, cY = 0,0
 
@@ -236,17 +246,19 @@ function love.mousemoved(x, y, dx, dy)
 
     if love.mouse.isDown(1) then
         if toolbar.tool == "move" then
-            local imagesToDrag = {}
 
             for _, image in ipairs(pixels) do
                 for _, pixel in ipairs(image) do
-                    if utils:CheckCollision(x - cameraX, y - cameraY, 4, 4, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
-                        table.insert(imagesToDrag, image)
+                    if utils:CheckCollision(x - cameraX - 2, y - cameraY - 2, 4, 4, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                        if utils:TableFind(movingImages, image) == false then
+                            table.insert(movingImages, image)
+                        end
+                        
                         break
                     end
                 end
             end
-            for _, image in ipairs(imagesToDrag) do
+            for _, image in ipairs(movingImages) do
                 for _, pixel in ipairs(image) do
                     pixel.body:setX(pixel.body:getX() + dx)
                     pixel.body:setY(pixel.body:getY() + dy)
@@ -282,7 +294,7 @@ function love.mousemoved(x, y, dx, dy)
             
             for _, image in ipairs(pixels) do
                 for i, pixel in ipairs(image) do
-                    if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                    if utils:Distance(x - cameraX, y - cameraY, pixel.body:getX(), pixel.body:getY()) <= brushSize then
                         table.insert(toDelete, image)
                         break
                     end
@@ -305,7 +317,7 @@ function love.mousemoved(x, y, dx, dy)
             if #imagesToScale == 0 then
                 for _, image in ipairs(pixels) do
                     for _, pixel in ipairs(image) do
-                        if utils:CheckCollision(x - cameraX, y - cameraY, 4, 4, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                        if utils:Distance(x - cameraX, y - cameraY, pixel.body:getX(), pixel.body:getY()) <= brushSize then
                             
                             table.insert(imagesToScale, image)
                             break
@@ -395,7 +407,7 @@ function love.mousepressed(x,y,button)
         local didDelete = false
 
         for i, platform in ipairs(platforms) do
-            if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, platform.body:getX(), platform.body:getY(), platform.Size.X, platform.Size.Y) then
+            if utils:CheckCollision(x - cameraX - brushSize / 2, y - cameraY - brushSize / 2, brushSize, brushSize, platform.body:getX(), platform.body:getY(), platform.Size.X, platform.Size.Y) then
                 didDelete = true
                 table.remove(platforms, i)
                 platform.body:destroy()
@@ -438,7 +450,7 @@ function love.mousepressed(x,y,button)
         
         for _, image in ipairs(pixels) do
             for i, pixel in ipairs(image) do
-                if utils:CheckCollision(x - cameraX, y - cameraY, brushSize, brushSize, pixel.body:getX(), pixel.body:getY(), sizeX, sizeY) then
+                if utils:Distance(x - cameraX, y - cameraY, pixel.body:getX(), pixel.body:getY()) <= brushSize then
                     table.insert(toDelete, image)
                     break
                 end
@@ -458,6 +470,8 @@ function love.mousepressed(x,y,button)
 end
 
 function love.mousereleased()
+    movingImages = {}
+
     if toolbar.tool == "scale" then
         if #imagesToScale > 0 then
             for _, image in ipairs(imagesToScale) do
