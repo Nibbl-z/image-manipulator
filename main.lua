@@ -28,7 +28,7 @@ local movingImage = nil
 local movingPlatform = nil
 local scalingImage = nil
 local scalingPlatform = nil
-
+local platformCount = 1
 function Reset()
     for ii, image in ipairs(pixels) do
         for i, pixel in ipairs(image) do
@@ -227,6 +227,27 @@ function love.update(dt)
         currentPlatform.W = currentPlatform.W - cX
         currentPlatform.H = currentPlatform.H - cY
     end
+    
+    if scalingPlatform ~= nil then
+        scalingPlatform.Scaling = true
+        
+        scalingPlatform.Size.X = scalingPlatform.Size.X - cX
+        scalingPlatform.Size.Y = scalingPlatform.Size.Y - cY
+    end
+
+    if scalingImage ~= nil then
+        for _, pixel in ipairs(scalingImage) do
+            pixel.Scaling = true
+            pixel.Size.X = pixel.Size.X - cX / pixel.ImageSize.X * 2
+            pixel.Size.Y = pixel.Size.Y - cY / pixel.ImageSize.Y * 2
+            
+            local imageWidth = pixel.ImageSize.X * spacing * pixel.Size.X
+            local imageHeight = pixel.ImageSize.Y * spacing * pixel.Size.Y
+            
+            pixel.body:setX(pixel.PixelPosition.X * pixel.Size.X * spacing + mX - imageWidth / 2 - cameraX)
+            pixel.body:setY(pixel.PixelPosition.Y * pixel.Size.Y * spacing + mY - imageHeight / 2 - cameraY)
+        end
+    end
 
     cX, cY = 0,0
 
@@ -366,7 +387,7 @@ function love.mousemoved(x, y, dx, dy)
             for _, image in ipairs(pixels) do
                 for _, pixel in ipairs(image) do
                     if utils:CheckCollision(x - cameraX - 2, y - cameraY - 2, 4, 4, pixel.body:getX(), pixel.body:getY(), pixel.Size.X, pixel.Size.Y) then
-                        if scalingImage == nil then
+                        if scalingImage == nil and scalingPlatform == nil then
                             scalingImage = image
                         end
                     end
@@ -377,7 +398,7 @@ function love.mousemoved(x, y, dx, dy)
                 if utils:CheckCollision(
                 x - cameraX - 2, y - cameraY - 2, 4, 4, 
                 platform.body:getX() - platform.Size.X / 2, platform.body:getY() - platform.Size.Y / 2, platform.Size.X, platform.Size.Y) then    
-                    if scalingPlatform == nil then
+                    if scalingImage == nil and scalingPlatform == nil then
                         scalingPlatform = platform
                         scalingPlatform.OriginalSizeX = scalingPlatform.Size.X
                         scalingPlatform.OriginalSizeY = scalingPlatform.Size.Y
@@ -393,7 +414,7 @@ function love.mousemoved(x, y, dx, dy)
                     
                     local imageWidth = pixel.ImageSize.X * spacing * pixel.Size.X
                     local imageHeight = pixel.ImageSize.Y * spacing * pixel.Size.Y
-
+                    
                     pixel.body:setX(pixel.PixelPosition.X * pixel.Size.X * spacing + x - imageWidth / 2 - cameraX)
                     pixel.body:setY(pixel.PixelPosition.Y * pixel.Size.Y * spacing + y - imageHeight / 2 - cameraY)
                 end
@@ -545,26 +566,76 @@ function love.mousereleased()
     
     if toolbar.tool == "scale" then
         if scalingImage ~= nil then
-            for _, pixel in ipairs(scalingImage) do
+            for i, pixel in ipairs(scalingImage) do
+                pixel.body:setActive(false)
+
                 pixel.Scaling = false
                 pixel.shape = love.physics.newRectangleShape(math.abs(pixel.Size.X), math.abs(pixel.Size.Y))
-
+                
                 pixel.fixture = love.physics.newFixture(pixel.body, pixel.shape)
                 pixel.fixture:setUserData(pixel.Name)
+                
+                local px, py, sx, sy
+                    px = pixel.body:getX()
+                    py = pixel.body:getY()
+                    sx = math.abs(pixel.Size.X)
+                    sy = math.abs(pixel.Size.Y)
+
+                local newPixel = physicsInstace:New(nil, world, "dynamic", "rectangle", {X = sx, Y = sy}, defaultRestitution, 0,
+                {
+                    X = px,
+                    Y = py
+                })
+                newPixel.PixelPosition = {
+                    X = pixel.PixelPosition.X,
+                    Y = pixel.PixelPosition.Y,
+                }
+                newPixel.ImageSize = {X = pixel.ImageSize.X, Y = pixel.ImageSize.Y}
+                newPixel:SetColor(pixel.Color.R, pixel.Color.G, pixel.Color.B, pixel.Color.A)
+                newPixel.Shape = "rectangle"
+                newPixel.Size = {X = sx, Y = sy}
+                newPixel.ImageIndex = pixel.ImageIndex
+                pixel.body:destroy()
+                
+                pixels[pixel.ImageIndex][i] = newPixel
             end
 
         end
         
         if scalingPlatform ~= nil then
-            scalingPlatform.Scaling = false
+            for ii, v in ipairs(platforms) do
+                if v.ID == scalingPlatform.ID then
+                    v.body:setActive(false)
+                    
+                    local px, py, sx, sy
+                    px = v.body:getX() + v.Size.X / 2 - v.OriginalSizeX / 2
+                    py = v.body:getY() + v.Size.Y / 2 - v.OriginalSizeY / 2
+                    sx = math.abs(v.Size.X)
+                    sy = math.abs(v.Size.Y)
+
+                    local newPlatform = physicsInstace:New(nil, world, "static", "rectangle",
+                    {X = sx, Y = sy}, defaultRestitution, 0, {X = px, Y = py})
+                    
+                    newPlatform:SetColor(1,1,1,1)
+                    newPlatform.Shape = "rectangle"
+                    newPlatform.Size = {X = sx, Y = sy}
+                    newPlatform.ID = platformCount
+                    newPlatform.body:setX(px)
+                    newPlatform.body:setY(py)
+                    newPlatform.Scaling = false
+                    
+                    
+                    table.insert(platforms, newPlatform)
+                    platformCount = platformCount + 1
+                    
+                    v.body:destroy()
+                    table.remove(platforms, ii)
+                end
+            end
             
-            scalingPlatform.body:setY(scalingPlatform.body:getX() + scalingPlatform.Size.X / 2)
-            scalingPlatform.body:setY(scalingPlatform.body:getY() + scalingPlatform.Size.Y / 2)
-            scalingPlatform.shape = love.physics.newRectangleShape(math.abs(scalingPlatform.Size.X), math.abs(scalingPlatform.Size.Y))
-            scalingPlatform.fixture = love.physics.newFixture(scalingPlatform.body, scalingPlatform.shape)
         end
     end
-
+    
     if toolbar.tool == "build" then
         if currentPlatform ~= nil then
             placeSfx:clone():play()
@@ -579,20 +650,22 @@ function love.mousereleased()
                 currentPlatform.H = math.abs(currentPlatform.H)
             end
 
-            newPlatform = physicsInstace:New(nil, world, "static", "rectangle",
+            local newPlatform = physicsInstace:New(nil, world, "static", "rectangle",
             {X = currentPlatform.W, Y = currentPlatform.H}, defaultRestitution, 0, {X = currentPlatform.X - currentPlatform.W / 2 , Y = currentPlatform.Y - currentPlatform.H / 2 })
             newPlatform.body:setX(currentPlatform.X + currentPlatform.W / 2)
             newPlatform.body:setY(currentPlatform.Y + currentPlatform.H / 2)
             newPlatform:SetColor(1,1,1,1)
             newPlatform.Shape = "rectangle"
             newPlatform.Size = {X = currentPlatform.W, Y = currentPlatform.H}
-
+            newPlatform.ID = platformCount
             table.insert(platforms, newPlatform)
-
+            
             currentPlatform = nil
+
+            platformCount = platformCount + 1
         end
     end
-
+    
     scalingImage = nil
     scalingPlatform = nil
 end
@@ -657,6 +730,7 @@ function love.filedropped(file)
                 pixels[imageIndex][i]:SetColor(r,g,b,a)
                 pixels[imageIndex][i].Shape = "rectangle"
                 pixels[imageIndex][i].Size = {X = sizeX, Y = sizeY}
+                pixels[imageIndex][i].ImageIndex = imageIndex
                 i = i + 1
             end
 

@@ -23,17 +23,26 @@ function physicsInstance:New(o, world, bodyType, shape, size, restitution, dampi
     function o:Update()
         if o.SceneEnabled == false then return end
         
+        if o.body:isDestroyed() then
+            return
+        end
         o.Position.X = o.body:getX()
         o.Position.Y = o.body:getY()
     end 
 
     function o:ApplyForce(x, y)
         if o.SceneEnabled == false then return end
+        if o.body:isDestroyed() then
+            return
+        end
         o.body:applyForce(x, y)
     end
 
     function o:ApplyLinearImpulse(x, y, maxX, maxY)
         if o.SceneEnabled == false then return end
+        if o.body:isDestroyed() then
+            return
+        end
         o.body:applyLinearImpulse(x, y)
         
         if maxX and maxY then
@@ -51,6 +60,9 @@ function physicsInstance:New(o, world, bodyType, shape, size, restitution, dampi
     
     function o:Draw(camX, camY)
         if o.SceneEnabled == false then return end
+        if o.body:isDestroyed() then
+            return
+        end
         love.graphics.setColor(
             o.Color.R,
             o.Color.G,
