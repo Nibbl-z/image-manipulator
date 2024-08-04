@@ -107,15 +107,25 @@ function love.load()
     pixelDeleteSfx = love.audio.newSource("/audio/pixelDelete.wav", "static")
 
     bgMusic = love.audio.newSource("/music/main.mp3", "stream")
-    bgMusic:setVolume(0.3)
+    bgMusic:setVolume(0)
     bgMusic:setLooping(true)
     bgMusic:play()
+    
+    bgMusicPaused = love.audio.newSource("/music/paused.mp3", "stream")
+    bgMusicPaused:setVolume(0.3)
+    bgMusicPaused:setLooping(true)
+    bgMusicPaused:play()
 end
 
 local directions = {a = {1,0}, d = {-1,0}, w = {0,1}, s = {0,-1}}
 function love.update(dt)
     if toolbar.running then
+        bgMusic:setVolume(0.3)
+        bgMusicPaused:setVolume(0)
         world:update(dt)
+    else
+        bgMusicPaused:setVolume(0.3)
+        bgMusic:setVolume(0)
     end
     --wall:Update()
 
