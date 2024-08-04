@@ -92,7 +92,7 @@ end
 function love.load()
     love.window.setMode(800, 600, {resizable = true})
     love.window.setTitle("Image Playground")
-
+    love.window.setIcon(love.image.newImageData("/img/icon.png"))
     world = love.physics.newWorld(0,300,true)
 
     toolbar:Init(Reset, SetXGravity, SetYGravity, SetExplosionForce, SetXScale, SetYScale, SetBounciness, SetGrabSpeed)

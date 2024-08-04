@@ -52,6 +52,8 @@ function toolbar:Init(resetFunc, setXGravityFunc, setYGravityFunc, setExplosionF
             playTool.Image = playImg
         end
     end
+
+    table.insert(self.toolbuttons, playTool)
     
     moveTool = imagebutton:New(nil, tools, "/img/move.png")
     moveTool:SetSize(0,50,0,50)
